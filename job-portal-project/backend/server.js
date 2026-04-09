@@ -5,13 +5,14 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5005;
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Cek Koneksi
+// Menggunakan Routes
+app.use('/api/auth', require('./routes/authRoutes'));
+
 app.get('/', (req, res) => {
-  res.send('API Web Lowongan Kerja Running...');
+  res.send('API Web Lowongan Kerja PasukanYerusSolo Running...');
 });
 
 app.listen(PORT, () => {

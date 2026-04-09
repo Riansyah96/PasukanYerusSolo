@@ -9,8 +9,13 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
-pool.on('connect', () => {
-  console.log('Terhubung ke Database PostgreSQL');
+// Task: Uji koneksi database (test query sederhana) sesuai materi
+pool.query('SELECT NOW()', (err, res) => {
+  if (err) {
+    console.error('Koneksi Database Gagal ❌:', err.stack);
+  } else {
+    console.log('Koneksi Database Berhasil ✅. Waktu Server:', res.rows[0].now);
+  }
 });
 
 module.exports = pool;
