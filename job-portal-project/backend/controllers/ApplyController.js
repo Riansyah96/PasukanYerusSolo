@@ -1,7 +1,8 @@
+// controllers/ApplyController.js
 const pool = require('../config/db');
 
 class ApplyController {
-  // POST: Kirim lamaran
+  // Fitur 4: Kirim Lamaran (Umar)
   async submit(req, res) {
     const { id_lowongan, pesan_tambahan } = req.body;
     try {
@@ -9,22 +10,22 @@ class ApplyController {
         'INSERT INTO lamaran (id_user, id_lowongan, pesan_tambahan) VALUES (?, ?, ?)',
         [req.user.id, id_lowongan, pesan_tambahan]
       );
-      res.status(201).json({ msg: "Berhasil melamar", applyId: result.insertId });
+      res.status(201).json({ msg: "Lamaran berhasil terkirim!", applyId: result.insertId });
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
   }
 
-  // GET: Lihat daftar lamaran saya
-  async myApplications(req, res) {
+  
+  // Fitur 5: Simpan Favorit (Umar)
+  async saveFavorite(req, res) {
+    const { id_lowongan } = req.body;
     try {
-      const [rows] = await pool.query(
-        `SELECT l.*, lw.judul_posisi FROM lamaran l 
-         JOIN lowongan lw ON l.id_lowongan = lw.id_lowongan 
-         WHERE l.id_user = ?`,
-        [req.user.id]
+      await pool.query(
+        'INSERT INTO favorit (id_user, id_lowongan) VALUES (?, ?) ON DUPLICATE KEY UPDATE id_user=id_user',
+        [req.user.id, id_lowongan]
       );
-      res.json(rows);
+      res.json({ msg: "Lowongan berhasil disimpan ke favorit" });
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
