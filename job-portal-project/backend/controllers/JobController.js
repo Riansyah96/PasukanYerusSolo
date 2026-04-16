@@ -20,7 +20,6 @@ exports.index = async (req, res) => {
 };
 
 // controllers/JobController.js
-const pool = require('../config/db');
 
 class JobController {
   // FITUR 3: Eksplorasi Lowongan (Tugas Aby)
