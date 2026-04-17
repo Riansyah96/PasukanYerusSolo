@@ -1,20 +1,12 @@
 const express = require('express');
-const cors = require('cors');
-require('dotenv').config();
-
 const app = express();
-const PORT = process.env.PORT || 5005;
+const errorMiddleware = require('./middleware/errorMiddleware');
+const authRoutes = require('./routes/authRoutes');
 
-app.use(cors());
 app.use(express.json());
+app.use('/api', authRoutes);
 
-// Menggunakan Routes
-app.use('/api/auth', require('./routes/authRoutes'));
+// WAJIB: Letakkan di paling bawah setelah semua rute
+app.use(errorMiddleware);
 
-app.get('/', (req, res) => {
-  res.send('API Web Lowongan Kerja PasukanYerusSolo Running...');
-});
-
-app.listen(PORT, () => {
-  console.log(`Server jalan di port ${PORT}`);
-});
+app.listen(5005, () => console.log("Server aktif di port 5005"));
