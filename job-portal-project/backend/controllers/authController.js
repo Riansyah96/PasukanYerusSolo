@@ -1,3 +1,4 @@
+// controllers/authController.js
 const pool = require('../config/db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -5,12 +6,15 @@ const jwt = require('jsonwebtoken');
 exports.register = async (req, res) => {
   const { nama, email, password, role } = req.body;
   try {
+    // 1. Cek duplikasi email
     const [userExist] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
     if (userExist.length > 0) return res.status(400).json({ msg: "Email sudah terdaftar" });
 
+    // 2. Hash Password untuk keamanan
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
+    // 3. Simpan user baru (MySQL tidak mendukung RETURNING *, jadi kita ambil ID setelahnya)
     const [result] = await pool.query(
       'INSERT INTO users (nama, email, password, role) VALUES (?, ?, ?, ?)',
       [nama, email, hashedPassword, role]
@@ -32,6 +36,7 @@ exports.login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ msg: "Password salah" });
 
+    // Payload berisi ID dan Role untuk pengecekan hak akses di fitur lain
     const payload = { user: { id: user.id_user, role: user.role } };
     jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' }, (err, token) => {
       if (err) throw err;
