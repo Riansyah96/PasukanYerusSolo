@@ -34,3 +34,15 @@ router.put('/company/profile', auth, AdminController.updateCompany);
 router.get('/admin/stats', auth, AdminController.getStats);
 
 module.exports = router;
+
+const express = require('express');
+const router = express.Router();
+const { authValidation, jobValidation, applyValidation } = require('../middleware/validator');
+const auth = require('../middleware/auth');
+
+// Gunakan validasi sebelum controller dijalankan
+router.post('/register', authValidation, authController.register); // Rian
+router.post('/hrd/jobs', [auth, jobValidation], HRDController.createJob); // Iqbal
+router.post('/apply', [auth, applyValidation], ApplyController.submit); // Umar
+
+module.exports = router;
