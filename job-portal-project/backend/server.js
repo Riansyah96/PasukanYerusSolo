@@ -7,6 +7,7 @@ app.use(express.json());
 app.use('/api', authRoutes);
 
 // WAJIB: Letakkan di paling bawah setelah semua rute
-app.use(errorMiddleware);
 
 app.listen(5005, () => console.log("Server aktif di port 5005"));
+app.use(errorMiddleware);
+app.use(require('./middleware/errorMiddleware'));
