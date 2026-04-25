@@ -1,0 +1,25 @@
+# Dependency folders (sangat besar, tidak perlu di-upload)sss
+node_modules/
+jspm_packages/
+
+# Environment variables (sangat rahasia, JANGAN di-upload)
+.env
+.env.local
+.env.*.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs
+*.log
+
+# OS Metadata (khusus pengguna Linux/Fedora atau macOS)
+.DS_Store
+Thumbs.db
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
