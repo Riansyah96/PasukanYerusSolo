@@ -1,49 +1,54 @@
-// controllers/authController.js
 const pool = require('../config/db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-exports.register = async (req, res) => {
-  const { nama, email, password, role } = req.body;
+// Pastikan menggunakan exports.namaFungsi
+exports.register = async (req, res, next) => {
   try {
-    // 1. Cek duplikasi email
+    const { nama, email, password, role } = req.body;
     const [userExist] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
-    if (userExist.length > 0) return res.status(400).json({ msg: "Email sudah terdaftar" });
+    
+    if (userExist.length > 0) {
+      return res.status(400).json({ status: "fail", message: "Email sudah terdaftar" });
+    }
 
-    // 2. Hash Password untuk keamanan
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // 3. Simpan user baru (MySQL tidak mendukung RETURNING *, jadi kita ambil ID setelahnya)
-    const [result] = await pool.query(
+    await pool.query(
       'INSERT INTO users (nama, email, password, role) VALUES (?, ?, ?, ?)',
       [nama, email, hashedPassword, role]
     );
 
-    res.status(201).json({ msg: "Registrasi Berhasil", userId: result.insertId });
+    return res.status(201).json({ status: "success", message: "Registrasi Berhasil" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-exports.login = async (req, res) => {
-  const { email, password } = req.body;
+exports.login = async (req, res, next) => {
   try {
+    const { email, password } = req.body;
     const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
-    if (rows.length === 0) return res.status(400).json({ msg: "Email tidak terdaftar" });
+    
+    if (rows.length === 0) {
+      return res.status(400).json({ status: "fail", message: "Email tidak terdaftar" });
+    }
 
     const user = rows[0];
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ msg: "Password salah" });
+    if (!isMatch) {
+      return res.status(400).json({ status: "fail", message: "Password salah" });
+    }
 
-    // Payload berisi ID dan Role untuk pengecekan hak akses di fitur lain
-    const payload = { user: { id: user.id_user, role: user.role } };
-    jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' }, (err, token) => {
-      if (err) throw err;
-      res.json({ token, role: user.role, nama: user.nama });
-    });
+    const token = jwt.sign(
+      { id: user.id_user, role: user.role }, 
+      process.env.JWT_SECRET, 
+      { expiresIn: '1d' }
+    );
+
+    return res.json({ status: "success", token });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
-
