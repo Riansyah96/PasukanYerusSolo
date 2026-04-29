@@ -1,10 +1,9 @@
-const authorize = (role) => {
+const authorize = (...roles) => {
     return (req, res, next) => {
-        // req.user didapat dari middleware auth sebelumnya
-        if (req.user.role !== role) {
-            return res.status(403).json({ 
-                status: "fail", 
-                message: `Akses ditolak, fitur ini hanya untuk ${role}` 
+        if (!roles.includes(req.user.role)) {
+            return res.status(403).json({
+                status: "fail",
+                message: `Akses ditolak, peran ${req.user.role} tidak diizinkan mengakses fitur ini`
             });
         }
         next();
