@@ -1,20 +1,19 @@
-require('dotenv').config(); // Baris 1: Wajib untuk membaca .env
+require('dotenv').config();
 const express = require('express');
+const path = require('path'); // Tambahkan ini
 const app = express();
 const authRoutes = require('./routes/authRoutes');
 const errorMiddleware = require('./middleware/errorMiddleware');
 
 app.use(express.json());
 
-// Load semua rute
-app.use('/api', authRoutes);
+// MATERI PERTEMUAN 7: Serving Static Files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Error Middleware harus di bawah rute
+app.use('/api', authRoutes);
 app.use(errorMiddleware);
 
 const PORT = process.env.PORT || 5005;
 app.listen(PORT, () => {
     console.log(`Server aktif di port ${PORT}`);
-    // Log ini untuk memastikan JWT_SECRET terbaca (hapus setelah berhasil)
-    console.log("JWT Secret Terdeteksi:", process.env.JWT_SECRET ? "Ya" : "Tidak");
 });

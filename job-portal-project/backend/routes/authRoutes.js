@@ -1,38 +1,23 @@
 const express = require('express');
 const router = express.Router();
-
-// Import Controller
 const authController = require('../controllers/authController');
-const ProfileController = require('../controllers/ProfileController');
-const JobController = require('../controllers/JobController');
-const ApplyController = require('../controllers/ApplyController');
-const HRDController = require('../controllers/HRDController');
-const AdminController = require('../controllers/AdminController');
-
-// Import Middleware
 const auth = require('../middleware/auth');
-const { authValidation, jobValidation, applyValidation, companyValidation } = require('../middleware/validator');
+const authorize = require('../middleware/authorize');
+const upload = require('../middleware/upload');
 
-// --- AUTH & PROFILE ---
-router.post('/register', authValidation, authController.register);
+// Public Routes
+router.post('/register', authController.register);
 router.post('/login', authController.login);
-router.get('/profile', auth, ProfileController.show);
-router.post('/profile', auth, ProfileController.upsert);
 
-// --- JOB EXPLORATION & MODERATION ---
-router.get('/jobs', JobController.index);
-router.delete('/admin/jobs/:id', auth, JobController.moderateDelete);
+// Protected Routes (Contoh Fitur Iqbal - Perusahaan)
+router.post('/hrd/jobs', auth, authorize('Perusahaan'), (req, res) => {
+    res.json({ message: "Berhasil masuk ke dashboard Perusahaan" });
+});
 
-// --- APPLY & FAVORITE ---
-router.post('/apply', [auth, applyValidation], ApplyController.submit);
-router.post('/favorites', auth, ApplyController.saveFavorite);
-
-// --- HRD ---
-router.post('/hrd/jobs', [auth, jobValidation], HRDController.createJob);
-router.put('/hrd/status', auth, HRDController.updateStatus);
-
-// --- ADMIN & STATS ---
-router.put('/company/profile', [auth, companyValidation], AdminController.updateCompany);
-router.get('/admin/stats', auth, AdminController.getStats);
+// Contoh Fitur Umar (Upload CV Pelamar)
+router.post('/apply', auth, authorize('Pelamar'), upload.single('cv'), (req, res) => {
+    // Nama file yang tersimpan: req.file.filename
+    res.json({ message: "Lamaran terkirim dengan file: " + req.file.filename });
+});
 
 module.exports = router;
