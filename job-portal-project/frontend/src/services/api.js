@@ -1,10 +1,9 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'http://localhost:5005/api', // Sesuaikan dengan port backend kamu
+    baseURL: 'http://localhost:5005/api',
 });
 
-// Otomatis tempelkan Token JWT jika ada di localStorage
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem('token');
     if (token) {
