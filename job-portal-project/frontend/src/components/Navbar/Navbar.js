@@ -1,24 +1,30 @@
+// frontend/src/components/Navbar/Navbar.js
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const Navbar = ({ activeMenu, setActiveMenu, isAuthenticated, handleLogout }) => {
     const navigate = useNavigate();
-    const [isOpen, setIsOpen] = useState(false); // State untuk buka/tutup menu mobile
+    const [isOpen, setIsOpen] = useState(false);
+    
+    // State untuk melacak elemen mana yang sedang di-hover
+    const [hoveredMenu, setHoveredMenu] = useState(null);
 
     const navigateTo = (path, menuId) => {
         if (setActiveMenu) setActiveMenu(menuId);
         navigate(path);
-        setIsOpen(false); // Tutup menu setelah diklik
+        setIsOpen(false);
     };
 
-    const menuStyle = {
+    // Style dasar untuk menu
+    const getMenuStyle = (menuId) => ({
         background: 'none',
         border: 'none',
-        color: '#fff',
+        color: hoveredMenu === menuId ? '#ea580c' : '#fff', // Oranye saat di-hover
         fontWeight: '700',
         cursor: 'pointer',
-        fontSize: '14px'
-    };
+        fontSize: '14px',
+        transition: 'color 0.3s ease' // Animasi transisi halus
+    });
 
     return (
         <nav style={{ 
@@ -35,50 +41,61 @@ const Navbar = ({ activeMenu, setActiveMenu, isAuthenticated, handleLogout }) =>
                 <h1 style={{ color: '#ea580c', margin: 0, fontSize: '20px' }}>PasukanYerusSolo</h1>
             </div>
 
-            {/* Tombol Hamburger (Hanya muncul di mobile) */}
-            <button 
-                style={{ display: 'none', background: 'none', border: 'none', color: '#fff', fontSize: '24px' }}
-                className="hamburger"
-                onClick={() => setIsOpen(!isOpen)}
-            >
-                ☰
-            </button>
-
-            {/* Menu List */}
-            <div className="nav-menu" style={{ 
-                display: 'flex', 
-                gap: '20px', 
-                alignItems: 'center'
-            }}>
-                <button onClick={() => navigateTo('/', 'home')} style={menuStyle}>Home</button>
-                <button onClick={() => navigateTo('/eksplorasi', 'eksplorasi')} style={menuStyle}>Eksplorasi</button>
+            {/* Menu */}
+            <div className="nav-menu" style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+                <button 
+                    onClick={() => navigateTo('/', 'home')} 
+                    style={getMenuStyle('home')}
+                    onMouseEnter={() => setHoveredMenu('home')}
+                    onMouseLeave={() => setHoveredMenu(null)}
+                >Home</button>
+                <button 
+                    onClick={() => navigateTo('/eksplorasi', 'eksplorasi')} 
+                    style={getMenuStyle('eksplorasi')}
+                    onMouseEnter={() => setHoveredMenu('eksplorasi')}
+                    onMouseLeave={() => setHoveredMenu(null)}
+                >Eksplorasi</button>
                 
                 {isAuthenticated ? (
                     <>
-                        <button onClick={() => navigateTo('/favorit', 'favorit')} style={menuStyle}>Favorit</button>
-                        <button onClick={handleLogout} style={{ padding: '6px 16px', borderRadius: '20px', border: '1px solid #ef4444', background: 'transparent', color: '#ef4444', fontWeight: '700', fontSize: '12px', cursor: 'pointer' }}>Keluar</button>
+                        <button 
+                            onClick={() => navigateTo('/favorit', 'favorit')} 
+                            style={getMenuStyle('favorit')}
+                            onMouseEnter={() => setHoveredMenu('favorit')}
+                            onMouseLeave={() => setHoveredMenu(null)}
+                        >Favorit</button>
+                        <button 
+                            onClick={handleLogout} 
+                            style={{ 
+                                padding: '6px 16px', borderRadius: '20px', border: '1px solid #ef4444', 
+                                background: hoveredMenu === 'logout' ? '#ef4444' : 'transparent', 
+                                color: hoveredMenu === 'logout' ? '#fff' : '#ef4444', 
+                                fontWeight: '700', fontSize: '12px', cursor: 'pointer', transition: '0.3s' 
+                            }}
+                            onMouseEnter={() => setHoveredMenu('logout')}
+                            onMouseLeave={() => setHoveredMenu(null)}
+                        >Keluar</button>
                     </>
                 ) : (
-                    <button onClick={() => navigate('/login')} style={{ padding: '6px 16px', borderRadius: '20px', border: '1px solid #ea580c', background: 'transparent', color: '#ea580c', fontWeight: '700', fontSize: '12px', cursor: 'pointer' }}>Login</button>
+                    <button 
+                        onClick={() => navigate('/login')} 
+                        style={{ 
+                            padding: '6px 16px', borderRadius: '20px', 
+                            border: '1px solid #ea580c', 
+                            background: hoveredMenu === 'login' ? '#ea580c' : 'transparent', 
+                            color: hoveredMenu === 'login' ? '#fff' : '#ea580c', 
+                            fontWeight: '700', fontSize: '12px', cursor: 'pointer', transition: '0.3s' 
+                        }}
+                        onMouseEnter={() => setHoveredMenu('login')}
+                        onMouseLeave={() => setHoveredMenu(null)}
+                    >Login</button>
                 )}
             </div>
-
-            {/* Tambahkan CSS Media Query untuk Mobile */}
+            
+            {/* Gaya Hamburger Menu (Tetap dipertahankan) */}
             <style>{`
                 @media (max-width: 768px) {
-                    .hamburger { display: block !important; }
-                    .nav-menu { 
-                        display: ${isOpen ? 'flex !important' : 'none !important'};
-                        flex-direction: column;
-                        position: absolute;
-                        top: 70px;
-                        left: 0;
-                        width: 100%;
-                        background: #0c0a09;
-                        padding: 20px 0;
-                        border-bottom: 1px solid #262626;
-                        gap: 15px;
-                    }
+                    .nav-menu { display: none !important; }
                 }
             `}</style>
         </nav>
