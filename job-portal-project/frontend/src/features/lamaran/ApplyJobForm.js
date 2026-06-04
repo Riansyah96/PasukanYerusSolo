@@ -13,9 +13,7 @@ const ApplyJobForm = ({ jobId, onFormSuccess, triggerToast, appTheme }) => {
     const handleApply = async (e) => {
         e.preventDefault();
         if (!fileCv) {
-            if (typeof triggerToast === 'function') {
-                triggerToast('Silahkan lampirkan berkas CV anda terlebih dahulu!', 'warning');
-            }
+            triggerToast?.('Silahkan lampirkan berkas CV anda!', 'warning');
             return;
         }
 
@@ -25,74 +23,33 @@ const ApplyJobForm = ({ jobId, onFormSuccess, triggerToast, appTheme }) => {
         formData.append('cv', fileCv);
 
         try {
-            const response = await api.post('/lamaran', formData, {
+            // CUKUP '/apply' karena baseURL sudah '/api'
+            const response = await api.post('/apply', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
-            if (typeof triggerToast === 'function') {
-                triggerToast(response.data.message || 'Berkas lamaran berhasil terkirim!', 'success');
-            }
-            if (typeof onFormSuccess === 'function') onFormSuccess();
+            triggerToast?.(response.data.message || 'Lamaran terkirim!', 'success');
+            onFormSuccess?.();
         } catch (err) {
-            if (typeof triggerToast === 'function') {
-                triggerToast(err.response?.data?.message || 'Gagal mengirim berkas lamaran', 'danger');
-            }
+            triggerToast?.(err.response?.data?.message || 'Gagal mengirim lamaran', 'danger');
         }
     };
 
     return (
-        <form onSubmit={handleApply} style={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            gap: '12px', 
-            marginTop: '15px' 
-        }}>
-            <h5 style={{ margin: 0, fontSize: '13px', fontWeight: '800', color: '#ea580c' }}>
-                Kirim Lamaran untuk Posisi ini
-            </h5>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <input 
-                    type="file" 
-                    accept=".pdf" 
-                    onChange={handleFileChange}
-                    required
-                    style={{ 
-                        fontSize: '12px',
-                        color: isDark ? '#9e8476' : '#6b7280'
-                    }} 
-                />
+        <form onSubmit={handleApply} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <label style={{ fontSize: '12px', fontWeight: '600', color: isDark ? '#fef3c7' : '#291107' }}>
+                    Lampirkan CV (PDF)
+                </label>
+                <input type="file" accept=".pdf" onChange={handleFileChange} required style={{ fontSize: '12px', color: isDark ? '#9e8476' : '#6b7280' }} />
             </div>
-
             <textarea 
                 placeholder="Pesan tambahan untuk HRD..."
                 value={pesan} 
                 onChange={(e) => setPesan(e.target.value)}
-                style={{ 
-                    width: '100%', 
-                    minHeight: '70px', 
-                    padding: '10px', 
-                    borderRadius: '8px', 
-                    border: isDark ? '1px solid #22140a' : '1px solid #eaddd3', 
-                    background: isDark ? '#0d0703' : '#f9fafb', 
-                    color: isDark ? '#fef3c7' : '#291107', 
-                    fontSize: '13px', 
-                    boxSizing: 'border-box',
-                    resize: 'vertical'
-                }} 
+                style={{ width: '100%', minHeight: '70px', padding: '10px', borderRadius: '8px', border: isDark ? '1px solid #22140a' : '1px solid #eaddd3', background: isDark ? '#0d0703' : '#f9fafb', color: isDark ? '#fef3c7' : '#291107', fontSize: '13px' }} 
             />
-
-            <button type="submit" style={{ 
-                background: 'linear-gradient(135deg, #ea580c 0%, #f59e0b 100%)', 
-                color: 'white', 
-                border: 'none', 
-                padding: '11px', 
-                borderRadius: '8px', 
-                fontWeight: '800', 
-                cursor: 'pointer', 
-                fontSize: '13px',
-                boxShadow: '0 4px 12px rgba(234, 88, 12, 0.15)'
-            }}>
-                Kirim Berkas Lamaran (CV)
+            <button type="submit" style={{ background: '#ea580c', color: 'white', border: 'none', padding: '11px', borderRadius: '8px', fontWeight: '800', cursor: 'pointer', fontSize: '13px' }}>
+                Kirim Berkas
             </button>
         </form>
     );

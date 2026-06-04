@@ -5,7 +5,14 @@ const jwt = require('jsonwebtoken');
 // --- REGISTER ---
 exports.register = async (req, res, next) => {
     try {
+        // Sesuaikan dengan nama variabel yang dikirim dari frontend
         const { nama, email, password, role } = req.body;
+        
+        // Validasi input dasar agar tidak 500 error jika ada data kosong
+        if (!nama || !email || !password) {
+            return res.status(400).json({ message: "Semua field harus diisi" });
+        }
+
         const salt = await bcrypt.genSalt(10);
         const hashedPath = await bcrypt.hash(password, salt);
 
@@ -16,7 +23,6 @@ exports.register = async (req, res, next) => {
         res.status(201).json({ status: "success", message: "User berhasil didaftarkan" });
     } catch (err) { next(err); }
 };
-
 // --- LOGIN ---
 exports.login = async (req, res, next) => {
     try {

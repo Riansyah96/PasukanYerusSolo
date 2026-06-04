@@ -1,97 +1,84 @@
 import React, { useState } from 'react';
-import Sidebar from './features/dashboard/Sidebar'; // Sesuaikan dengan jalur folder Sidebar.js kamu
+import { BrowserRouter as Router, Routes, Route, useNavigate, useParams } from 'react-router-dom';
+import Navbar from './components/Navbar/Navbar';
+import Footer from './components/Footer/Footer';
+import Hero from './features/landing/Hero';
+import HowItWorks from './features/landing/HowItWorks';
+import JobServices from './features/landing/JobServices';
+import Testimonials from './features/landing/Testimonials';
+import CTA from './features/landing/CTA';
 import JobListContainer from './features/eksplorasi/JobListContainer';
-import FavoriteListContainer from './features/eksplorasi/FavoriteListContainer';
+import Login from './components/auth/Login';
+import Register from './components/auth/Register';
+import JobDetail from './components/jobs/JobDetail';
 
-const App = () => {
-    // 1. State Manajemen Navigasi Menu Aktif
-    const [activeMenu, setActiveMenu] = useState('eksplorasi');
-    
-    // 2. State Manajemen Tema Tampilan Global (Default: dark menyesuaikan PasukanYerusSolo)
-    const [appTheme] = useState('dark'); 
+// 1. Tambahkan Wrapper ini agar tidak error 'not defined'
+const JobDetailWrapper = () => {
+    const { id } = useParams();
+    // Di sini nanti Anda bisa fetch data berdasarkan ID
+    return <JobDetail job={{ id, title: 'Lowongan Detail', company: 'PasukanYerusSolo' }} />;
+};
 
-    // 3. Fungsi Simulasi Logout Akun
-    const handleLogout = () => {
-        localStorage.clear();
-        alert('Anda telah berhasil keluar dari akun Workspace.');
-        window.location.reload();
-    };
-
-    // 4. Struktur Warna Tema Global Workspace
-    const isDark = appTheme === 'dark';
-    const themeColors = {
-        appBg: isDark ? '#080402' : '#fffbf7',
-        contentBg: isDark ? '#110a05' : '#fcfaf7',
-        border: isDark ? '1px solid #22140a' : '1px solid #eaddd3'
-    };
-
-    // 5. Kondisional Rendering Konten Tengah Berdasarkan Menu yang Dipilih di Sidebar
-    const renderContent = () => {
-        switch (activeMenu) {
-            case 'eksplorasi':
-                return <JobListContainer appTheme={appTheme} />;
-            case 'favorit':
-                return <FavoriteListContainer appTheme={appTheme} />;
-            case 'status':
-                return (
-                    <div style={{ padding: '20px', color: isDark ? '#9e8476' : '#6b7280', textAlign: 'center' }}>
-                        <h3>📋 Status Lamaran Kerja</h3>
-                        <p>Fitur riwayat pelamaran sedang disinkronisasikan oleh sistem.</p>
-                    </div>
-                );
-            case 'profil':
-                return (
-                    <div style={{ padding: '20px', color: isDark ? '#9e8476' : '#6b7280', textAlign: 'center' }}>
-                        <h3>👤 Profil Saya</h3>
-                        <p>Halaman manajemen biodata dan CV Pelamar.</p>
-                    </div>
-                );
-            case 'password':
-                return (
-                    <div style={{ padding: '20px', color: isDark ? '#9e8476' : '#6b7280', textAlign: 'center' }}>
-                        <h3>🔒 Ganti Keamanan Password</h3>
-                        <p>Amankan akun Anda dengan melakukan pembaruan kata sandi berkala.</p>
-                    </div>
-                );
-            default:
-                return <JobListContainer appTheme={appTheme} />;
-        }
-    };
-
+const ViewAllButton = () => {
+    const navigate = useNavigate();
     return (
-        <div style={{
-            display: 'flex',
-            width: '100%',
-            minHeight: '100vh',
-            background: themeColors.appBg,
-            fontFamily: "'Inter', sans-serif",
-            boxSizing: 'border-box',
-            margin: 0,
-            padding: 0
-        }}>
-            {/* PANEL NAVIGASI KIRI: Menyuntikkan State & Fungsi Pengubah ke Sidebar */}
-            <Sidebar 
-                activeMenu={activeMenu} 
-                setActiveMenu={setActiveMenu} 
-                appTheme={appTheme} 
-                handleLogout={handleLogout} 
-            />
-
-            {/* PANEL KONTEN UTAMA KANAN: Tempat Merender Halaman yang Dipilih */}
-            <main style={{
-                flex: 1,
-                padding: '40px',
-                background: themeColors.contentBg,
-                minHeight: '100vh',
-                boxSizing: 'border-box',
-                overflowY: 'auto'
-            }}>
-                <div style={{ maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
-                    {renderContent()}
-                </div>
-            </main>
+        <div style={{ textAlign: 'center', marginTop: '20px' }}>
+            <button 
+                onClick={() => navigate('/eksplorasi')} 
+                style={{ padding: '10px 24px', background: 'transparent', border: '1px solid #ea580c', color: '#ea580c', borderRadius: '8px', cursor: 'pointer' }}
+            >
+                Lihat Semua Lowongan
+            </button>
         </div>
     );
 };
 
-export default App;
+const App = () => {
+    const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
+    const [activeMenu, setActiveMenu] = useState('home');
+
+    return (
+        <div className="flex flex-col min-h-screen bg-black text-white">
+            <Navbar activeMenu={activeMenu} setActiveMenu={setActiveMenu} isAuthenticated={isAuthenticated} />
+            <main className="flex-grow">
+                <Routes>
+                    <Route path="/" element={
+                        <>
+                            <Hero />
+                            <HowItWorks />
+                            <JobServices />
+                            <section style={{ maxWidth: '900px', margin: '40px auto', padding: '0 20px' }}>
+                                <h2 style={{ fontSize: '20px', fontWeight: '700', color: '#fef3c7', marginBottom: '20px' }}>
+                                    Lowongan Terbaru
+                                </h2>
+                                <JobListContainer variant="simple" limit={4} />
+                                <ViewAllButton />
+                            </section>
+                            <Testimonials />
+                            <CTA />
+                        </>
+                    } />
+                    <Route path="/eksplorasi" element={
+                        <div style={{ maxWidth: '900px', margin: '40px auto', padding: '0 20px' }}>
+                            <h1 style={{ fontSize: '24px', marginBottom: '20px', color: '#fef3c7' }}>Semua Lowongan Kerja</h1>
+                            <JobListContainer variant="full" />
+                        </div>
+                    } />
+                    {/* Rute Detail Pekerjaan */}
+                    <Route path="/job/:id" element={<JobDetailWrapper />} />
+                    <Route path="/login" element={<Login onLoginSuccess={() => setIsAuthenticated(true)} />} />
+                    <Route path="/register" element={<Register />} />
+                </Routes>
+            </main>
+            <Footer />
+        </div>
+    );
+};
+
+const AppWrapper = () => (
+    <Router>
+        <App />
+    </Router>
+);
+
+export default AppWrapper;

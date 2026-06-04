@@ -20,129 +20,39 @@ const Register = () => {
         e.preventDefault();
         setLoading(true);
 
+        // Pastikan key object sesuai dengan yang diminta backend (nama, bukan nama_lengkap)
+        const payload = {
+            nama: formData.nama_lengkap, 
+            email: formData.email,
+            password: formData.password,
+            role: formData.role
+        };
+
         try {
-            await api.post('/auth/register', formData);
+            await api.post('/auth/register', payload); // Kirim payload yang sudah disesuaikan
             alert('Pendaftaran berhasil! Silakan masuk.');
             navigate('/login');
         } catch (err) {
             console.error(err);
-            alert('Pendaftaran Berhasil (Simulasi Berhasil)!');
-            navigate('/login');
+            alert(err.response?.data?.message || 'Terjadi kesalahan saat pendaftaran.');
         } finally {
             setLoading(false);
         }
     };
 
-    const styles = {
-        container: {
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            minHeight: '100vh',
-            background: '#fffbf7',
-            fontFamily: 'inherit',
-            padding: '20px'
-        },
-        card: {
-            width: '100%',
-            maxWidth: '480px',
-            background: 'linear-gradient(180deg, #1c0d02 0%, #2e1505 100%)',
-            borderRadius: '28px',
-            padding: '35px 35px',
-            boxShadow: '0 25px 50px -12px rgba(45, 15, 0, 0.4)',
-            color: '#fef3c7',
-            border: '1px solid rgba(255, 165, 0, 0.05)'
-        },
-        brand: {
-            textAlign: 'center',
-            marginBottom: '24px'
-        },
-        logo: {
-            fontSize: '28px',
-            fontWeight: '900',
-            background: 'linear-gradient(135deg, #fb923c 0%, #facc15 100%)',
-            display: 'block',
-            WebkitBackgroundClip: 'text',
-            backgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            letterSpacing: '-1.2px',
-            margin: 0
-        },
-        subBrand: {
-            fontSize: '11px',
-            color: '#ea580c',
-            letterSpacing: '3px',
-            fontWeight: '800',
-            textTransform: 'uppercase',
-            marginTop: '6px'
-        },
-        title: {
-            fontSize: '18px',
-            fontWeight: '700',
-            color: '#ffffff',
-            textAlign: 'center',
-            marginBottom: '20px'
-        },
-        label: {
-            fontSize: '11px',
-            fontWeight: '700',
-            color: '#fb923c',
-            textTransform: 'uppercase',
-            display: 'block',
-            marginBottom: '6px'
-        },
-        input: {
-            width: '100%',
-            padding: '12px 16px',
-            borderRadius: '12px',
-            border: '1px solid rgba(254, 215, 170, 0.15)',
-            backgroundColor: '#2e1d11',
-            fontSize: '14px',
-            color: '#fef3c7',
-            outline: 'none',
-            boxSizing: 'border-box',
-            marginBottom: '16px'
-        },
-        select: {
-            width: '100%',
-            padding: '12px 16px',
-            borderRadius: '12px',
-            border: '1px solid rgba(254, 215, 170, 0.15)',
-            backgroundColor: '#2e1d11',
-            fontSize: '14px',
-            color: '#fef3c7',
-            outline: 'none',
-            boxSizing: 'border-box',
-            marginBottom: '20px',
-            cursor: 'pointer',
-            fontWeight: '600'
-        },
-        btn: {
-            width: '100%',
-            padding: '14px',
-            borderRadius: '14px',
-            border: 'none',
-            background: 'linear-gradient(135deg, #ea580c 0%, #f59e0b 100%)',
-            color: '#fff',
-            fontWeight: '700',
-            fontSize: '15px',
-            cursor: 'pointer',
-            boxShadow: '0 6px 20px rgba(234, 88, 12, 0.3)',
-            marginTop: '5px'
-        },
-        footerText: {
-            textAlign: 'center',
-            marginTop: '20px',
-            fontSize: '13px',
-            color: '#fca5a5'
-        },
-        link: {
-            color: '#facc15',
-            textDecoration: 'none',
-            fontWeight: '700',
-            marginLeft: '5px',
-            cursor: 'pointer'
-        }
+   const styles = {
+        container: { display: 'flex',justifyContent: 'center',alignItems: 'center',minHeight: '100vh',background: '#120902',padding: '1rem' },
+        card: { width: '100%', maxWidth: '400px', background: 'linear-gradient(180deg, #1c0d02 0%, #2e1505 100%)', borderRadius: '1.5rem', padding: '2rem', boxShadow: '0 25px 50px -12px rgba(45, 15, 0, 0.4)', color: '#fef3c7' },
+        brand: { textAlign: 'center', marginBottom: '1.5rem' },
+        logo: { fontSize: '1.75rem', fontWeight: '900', background: 'linear-gradient(135deg, #fb923c 0%, #facc15 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: 0 },
+        subBrand: { fontSize: '0.75rem', color: '#ea580c', letterSpacing: '0.2rem', fontWeight: '800', textTransform: 'uppercase', marginTop: '0.25rem' },
+        title: { fontSize: '1.25rem', fontWeight: '700', color: '#ffffff', textAlign: 'center', marginBottom: '1.5rem' },
+        label: { fontSize: '0.75rem', fontWeight: '700', color: '#fb923c', textTransform: 'uppercase', display: 'block', marginBottom: '0.5rem' },
+        input: { width: '100%', padding: '0.85rem 1rem', borderRadius: '0.75rem', border: '1px solid rgba(254, 215, 170, 0.15)', backgroundColor: '#2e1d11', fontSize: '1rem', color: '#fef3c7', marginBottom: '1rem', boxSizing: 'border-box' },
+        select: { width: '100%', padding: '0.85rem 1rem', borderRadius: '0.75rem', border: '1px solid rgba(254, 215, 170, 0.15)', backgroundColor: '#2e1d11', fontSize: '1rem', color: '#fef3c7', marginBottom: '1.25rem', cursor: 'pointer' },
+        btn: { width: '100%', padding: '0.85rem', borderRadius: '0.75rem', border: 'none', background: 'linear-gradient(135deg, #ea580c 0%, #f59e0b 100%)', color: '#fff', fontWeight: '700', fontSize: '1rem', cursor: 'pointer', marginTop: '0.5rem' },
+        footerText: { textAlign: 'center', marginTop: '1.25rem', fontSize: '0.85rem', color: '#fca5a5' },
+        link: { color: '#facc15', fontWeight: '700', marginLeft: '0.25rem', cursor: 'pointer' }
     };
 
     return (

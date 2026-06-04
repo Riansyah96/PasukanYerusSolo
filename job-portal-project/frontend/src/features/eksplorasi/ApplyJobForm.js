@@ -11,12 +11,12 @@ const ApplyJobForm = ({ jobId, onFormSuccess }) => {
 
     const handleApply = async (e) => {
         e.preventDefault();
-        if (!fileCv) return alert('Silahkan lampirkan berkas CV!');
+        if (!fileCv) return alert('Silahkan lampirkan berkas CV anda terlebih dahulu!');
 
         const formData = new FormData();
         formData.append('id_lowongan', jobId);
         formData.append('pesan_tambahan', pesan);
-        formData.append('cv', fileCv); // Key ini harus sama dengan middleware upload.single('cv')[cite: 18]
+        formData.append('cv', fileCv);
 
         try {
             const response = await api.post('/apply', formData, {
@@ -25,7 +25,7 @@ const ApplyJobForm = ({ jobId, onFormSuccess }) => {
             alert(response.data.message || 'Lamaran berhasil dikirim!');
             if (onFormSuccess) onFormSuccess();
         } catch (err) {
-            alert(err.response?.data?.message || 'Gagal mengirim berkas');
+            alert(err.response?.data?.message || 'Gagal mengirim berkas lamaran');
         }
     };
 

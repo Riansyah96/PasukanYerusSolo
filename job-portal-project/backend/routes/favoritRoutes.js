@@ -1,11 +1,12 @@
+// routes/favoritRoutes.js
 const express = require('express');
 const router = express.Router();
 const favoritController = require('../controllers/favoritController');
-const { verifyToken } = require('../middleware/auth'); // Pastikan middleware auth terpasang
+// Pastikan middleware auth sudah di-import jika Anda menggunakan auth
+const auth = require('../middleware/auth'); 
 
-// Jika di server.js sudah app.use('/api', favoritRoutes), 
-// maka path di sini cukup '/favorit'
-router.post('/favorit', verifyToken, favoritController.tambahFavorit);
-router.get('/favorit', verifyToken, favoritController.getDaftarFavorit);
+// Rute ini akan menjadi /api/favorit karena di server.js sudah menggunakan app.use('/api', favoritRoutes)
+router.get('/favorit', auth, favoritController.getDaftarFavorit);
+router.post('/favorit', auth, favoritController.tambahFavorit);
 
 module.exports = router;
