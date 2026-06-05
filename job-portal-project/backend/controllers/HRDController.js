@@ -1,3 +1,4 @@
+// controllers/HRDController.js
 const pool = require('../config/db');
 
 class HRDController {
@@ -24,5 +25,17 @@ class HRDController {
       res.json({ status: "success", message: "Status seleksi diperbarui" });
     } catch (err) { next(err); }
   }
-}
+
+  async getMyJobs(req, res, next) {
+    try {
+      // Penting: Hanya ambil lowongan milik perusahaan yang sedang login
+      const [rows] = await pool.query(
+        'SELECT * FROM lowongan WHERE id_perusahaan = ?', 
+        [req.user.id]
+      );
+      res.json({ status: "success", data: rows });
+    } catch (err) { next(err); }
+  }
+} // <--- Kurung kurawal penutup kelas sekarang ada di sini
+
 module.exports = new HRDController();

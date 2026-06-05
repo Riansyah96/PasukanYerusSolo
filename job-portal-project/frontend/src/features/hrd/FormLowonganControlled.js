@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+import { ThemeContext } from '../../context/ThemeContext';
 
-const FormLowonganControlled = ({ onSaveJob, appTheme, isMobile }) => {
+const FormLowonganControlled = ({ onSaveJob, isMobile }) => {
+    const { theme } = useContext(ThemeContext);
+    const isDark = theme === 'dark';
     const [jobData, setJobData] = useState({
         judul_posisi: '', 
         kategori: '', 
@@ -10,9 +13,6 @@ const FormLowonganControlled = ({ onSaveJob, appTheme, isMobile }) => {
         deskripsi_pekerjaan: ''
     });
 
-    const isDark = appTheme === 'dark';
-
-    // Palet Warna Selaras dengan Workspace Global PasukanYerusSolo
     const colors = {
         cardBg: isDark ? '#120b06' : '#ffffff',
         border: isDark ? '1px solid #291a0e' : '1px solid #ebdcd0',
@@ -29,8 +29,12 @@ const FormLowonganControlled = ({ onSaveJob, appTheme, isMobile }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         onSaveJob(jobData);
-        // Reset form setelah submit sukses
         setJobData({ judul_posisi: '', kategori: '', tipe_pekerjaan: 'Full-time', gaji: '', lokasi: '', deskripsi_pekerjaan: '' });
+    };
+
+    const inputFocusStyle = {
+        borderColor: '#ea580c',
+        boxShadow: '0 0 0 2px rgba(234, 88, 12, 0.2)'
     };
 
     const styles = {
@@ -39,7 +43,7 @@ const FormLowonganControlled = ({ onSaveJob, appTheme, isMobile }) => {
             border: colors.border,
             borderRadius: '24px',
             padding: isMobile ? '20px' : '32px',
-            fontFamily: "'Plus Jakarta Sans', sans-serif"
+            transition: 'all 0.3s ease'
         },
         title: { fontSize: isMobile ? '20px' : '24px', fontWeight: '800', color: '#ea580c', margin: '0 0 6px 0' },
         subtitle: { color: colors.textMuted, fontSize: '13px', margin: '0 0 28px 0', lineHeight: '1.5' },
@@ -62,7 +66,8 @@ const FormLowonganControlled = ({ onSaveJob, appTheme, isMobile }) => {
             fontSize: '14px',
             outline: 'none',
             fontWeight: '500',
-            boxSizing: 'border-box'
+            boxSizing: 'border-box',
+            transition: 'all 0.3s ease'
         },
         textarea: {
             width: '100%',
@@ -77,7 +82,8 @@ const FormLowonganControlled = ({ onSaveJob, appTheme, isMobile }) => {
             minHeight: '120px',
             resize: 'vertical',
             boxSizing: 'border-box',
-            lineHeight: '1.5'
+            lineHeight: '1.5',
+            transition: 'all 0.3s ease'
         },
         submitBtn: {
             width: '100%',
@@ -90,48 +96,134 @@ const FormLowonganControlled = ({ onSaveJob, appTheme, isMobile }) => {
             fontSize: '14px',
             cursor: 'pointer',
             boxShadow: '0 4px 16px rgba(234, 88, 12, 0.15)',
-            transition: 'opacity 0.2s'
+            transition: 'all 0.3s ease'
         }
     };
 
     return (
         <div style={styles.formCard}>
-            <h2 style={styles.title}>Publikasikan Lowongan</h2>
+            <h2 style={styles.title}>📢 Publikasikan Lowongan</h2>
             <p style={styles.subtitle}>Buat dan terbitkan berkas kualifikasi pekerjaan baru ke dalam sistem portal pencarian kerja.</p>
             
             <form onSubmit={handleSubmit}>
                 <div style={styles.gridContainer}>
                     <div style={styles.formGroup}>
                         <label style={styles.label}>Judul Posisi</label>
-                        <input type="text" name="judul_posisi" placeholder="Contoh: Senior Fullstack Engineer" value={jobData.judul_posisi} onChange={handleChange} required style={styles.input} />
+                        <input 
+                            type="text" 
+                            name="judul_posisi" 
+                            placeholder="Contoh: Senior Fullstack Engineer" 
+                            value={jobData.judul_posisi} 
+                            onChange={handleChange} 
+                            required 
+                            style={styles.input}
+                            onFocus={(e) => Object.assign(e.currentTarget.style, inputFocusStyle)}
+                            onBlur={(e) => {
+                                e.currentTarget.style.borderColor = colors.border;
+                                e.currentTarget.style.boxShadow = 'none';
+                            }}
+                        />
                     </div>
                     <div style={styles.formGroup}>
                         <label style={styles.label}>Kategori</label>
-                        <input type="text" name="kategori" placeholder="Contoh: Teknologi / Informasi" value={jobData.kategori} onChange={handleChange} required style={styles.input} />
+                        <input 
+                            type="text" 
+                            name="kategori" 
+                            placeholder="Contoh: Teknologi / Informasi" 
+                            value={jobData.kategori} 
+                            onChange={handleChange} 
+                            required 
+                            style={styles.input}
+                            onFocus={(e) => Object.assign(e.currentTarget.style, inputFocusStyle)}
+                            onBlur={(e) => {
+                                e.currentTarget.style.borderColor = colors.border;
+                                e.currentTarget.style.boxShadow = 'none';
+                            }}
+                        />
                     </div>
                     <div style={styles.formGroup}>
                         <label style={styles.label}>Tipe Pekerjaan</label>
-                        <select name="tipe_pekerjaan" value={jobData.tipe_pekerjaan} onChange={handleChange} style={styles.input}>
-                            <option value="Full-time">Full-time</option>
-                            <option value="Part-time">Part-time</option>
-                            <option value="Remote">Remote</option>
-                            <option value="Contract">Contract</option>
+                        <select 
+                            name="tipe_pekerjaan" 
+                            value={jobData.tipe_pekerjaan} 
+                            onChange={handleChange} 
+                            style={styles.input}
+                            onFocus={(e) => Object.assign(e.currentTarget.style, inputFocusStyle)}
+                            onBlur={(e) => {
+                                e.currentTarget.style.borderColor = colors.border;
+                                e.currentTarget.style.boxShadow = 'none';
+                            }}
+                        >
+                            <option value="Full-time">⏰ Full-time</option>
+                            <option value="Part-time">🕒 Part-time</option>
+                            <option value="Remote">🏠 Remote</option>
+                            <option value="Contract">📄 Contract</option>
                         </select>
                     </div>
                     <div style={styles.formGroup}>
                         <label style={styles.label}>Estimasi Gaji (Rp)</label>
-                        <input type="number" name="gaji" placeholder="Contoh: 12000000" value={jobData.gaji} onChange={handleChange} style={styles.input} />
+                        <input 
+                            type="number" 
+                            name="gaji" 
+                            placeholder="Contoh: 12000000" 
+                            value={jobData.gaji} 
+                            onChange={handleChange} 
+                            style={styles.input}
+                            onFocus={(e) => Object.assign(e.currentTarget.style, inputFocusStyle)}
+                            onBlur={(e) => {
+                                e.currentTarget.style.borderColor = colors.border;
+                                e.currentTarget.style.boxShadow = 'none';
+                            }}
+                        />
                     </div>
                     <div style={styles.fullWidth}>
                         <label style={styles.label}>Lokasi Penempatan</label>
-                        <input type="text" name="lokasi" placeholder="Contoh: Surakarta, Jawa Tengah (Hybrid)" value={jobData.lokasi} onChange={handleChange} required style={styles.input} />
+                        <input 
+                            type="text" 
+                            name="lokasi" 
+                            placeholder="Contoh: Surakarta, Jawa Tengah (Hybrid)" 
+                            value={jobData.lokasi} 
+                            onChange={handleChange} 
+                            required 
+                            style={styles.input}
+                            onFocus={(e) => Object.assign(e.currentTarget.style, inputFocusStyle)}
+                            onBlur={(e) => {
+                                e.currentTarget.style.borderColor = colors.border;
+                                e.currentTarget.style.boxShadow = 'none';
+                            }}
+                        />
                     </div>
                     <div style={styles.fullWidth}>
                         <label style={styles.label}>Deskripsi & Spesifikasi Pekerjaan</label>
-                        <textarea name="deskripsi_pekerjaan" placeholder="Tuliskan deskripsi tugas pokok, kualifikasi wajib, serta benefit yang didapatkan..." value={jobData.deskripsi_pekerjaan} onChange={handleChange} required style={styles.textarea} />
+                        <textarea 
+                            name="deskripsi_pekerjaan" 
+                            placeholder="Tuliskan deskripsi tugas pokok, kualifikasi wajib, serta benefit yang didapatkan..." 
+                            value={jobData.deskripsi_pekerjaan} 
+                            onChange={handleChange} 
+                            required 
+                            style={styles.textarea}
+                            onFocus={(e) => Object.assign(e.currentTarget.style, inputFocusStyle)}
+                            onBlur={(e) => {
+                                e.currentTarget.style.borderColor = colors.border;
+                                e.currentTarget.style.boxShadow = 'none';
+                            }}
+                        />
                     </div>
                 </div>
-                <button type="submit" style={styles.submitBtn}>Simpan & Publikasikan Lowongan</button>
+                <button 
+                    type="submit" 
+                    style={styles.submitBtn}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                        e.currentTarget.style.boxShadow = '0 8px 20px rgba(234,88,12,0.3)';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = '0 4px 16px rgba(234, 88, 12, 0.15)';
+                    }}
+                >
+                    🚀 Simpan & Publikasikan Lowongan
+                </button>
             </form>
         </div>
     );

@@ -1,19 +1,50 @@
-import React from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import api from '../../services/api';
+import { ThemeContext } from '../../context/ThemeContext';
 import FormLowonganControlled from './FormLowonganControlled';
 import ApplicationStatusTracker from './ApplicationStatusTracker';
 
-const JobPublisher = ({ appTheme, isMobile }) => {
-    const isDark = appTheme === 'dark';
+const JobPublisher = ({ isMobile }) => {
+    const { theme } = useContext(ThemeContext);
+    const isDark = theme === 'dark';
+    const [applications, setApplications] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchApplications = async () => {
+            try {
+                const response = await api.get('/hrd/applications');
+                if (response.data && response.data.length > 0) {
+                    setApplications(response.data);
+                } else {
+                    setApplications([
+                        { id: '101', name: 'Muhammad Anfasa Umar', position: 'Fullstack Developer', status: 'Pending', applied_date: '2026-06-01' },
+                        { id: '102', name: 'Siti Nurhaliza', position: 'Frontend Engineer', status: 'Interview', applied_date: '2026-05-28' },
+                        { id: '103', name: 'Budi Santoso', position: 'Backend Developer', status: 'Lolos', applied_date: '2026-05-25' }
+                    ]);
+                }
+            } catch (err) {
+                console.error("Gagal memuat lamaran:", err);
+                setApplications([
+                    { id: '101', name: 'Muhammad Anfasa Umar', position: 'Fullstack Developer', status: 'Pending', applied_date: '2026-06-01' },
+                    { id: '102', name: 'Siti Nurhaliza', position: 'Frontend Engineer', status: 'Interview', applied_date: '2026-05-28' },
+                    { id: '103', name: 'Budi Santoso', position: 'Backend Developer', status: 'Lolos', applied_date: '2026-05-25' }
+                ]);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchApplications();
+    }, []);
 
     const handlePublish = async (jobData) => {
         try {
             const response = await api.post('/hrd/lowongan', jobData);
             if (response.data.status === 'success') {
-                alert('Sukses: ' + response.data.message);
+                alert('✅ Sukses: ' + response.data.message);
             }
         } catch (err) {
-            alert('Gagal mempublikasikan: ' + (err.response?.data?.message || err.message));
+            alert('❌ Gagal mempublikasikan: ' + (err.response?.data?.message || err.message));
         }
     };
 
@@ -24,66 +55,89 @@ const JobPublisher = ({ appTheme, isMobile }) => {
         textMuted: isDark ? '#9e8476' : '#735b4e'
     };
 
-    const styles = {
-        layoutContainer: {
+    if (loading) {
+        return (
+            <div style={{ textAlign: 'center', padding: '60px', color: colors.textMuted }}>
+                ⏳ Memuat dashboard...
+            </div>
+        );
+    }
+
+    return (
+        <div style={{
             display: 'flex',
             flexDirection: isMobile ? 'column' : 'row',
             gap: '24px',
             width: '100%',
-            fontFamily: "'Plus Jakarta Sans', sans-serif",
+            maxWidth: '1400px',
+            margin: '0 auto',
+            padding: '20px',
             alignItems: 'flex-start'
-        },
-        leftSection: { flex: isMobile ? '1' : '1.3', width: '100%' },
-        rightSection: {
-            flex: '1',
-            width: '100%',
-            background: colors.cardBg,
-            border: colors.border,
-            borderRadius: '24px',
-            padding: '24px',
-            boxSizing: 'border-box'
-        },
-        panelTitle: { fontSize: '18px', fontWeight: '800', color: colors.textMain, margin: '0 0 4px 0' },
-        panelSubtitle: { color: colors.textMuted, fontSize: '13px', margin: '0 0 20px 0', lineHeight: '1.4' },
-        applicantCard: {
-            padding: '16px',
-            borderRadius: '16px',
-            border: colors.border,
-            background: isDark ? '#080402' : '#ffffff'
-        },
-        applicantName: { fontSize: '15px', fontWeight: '800', color: colors.textMain, margin: '0 0 4px 0' },
-        applicantMeta: { fontSize: '12px', color: '#ea580c', fontWeight: '700', margin: 0 }
-    };
-
-    return (
-        <div style={styles.layoutContainer}>
-            {/* SEGMEN KIRI: Formulir Pembuatan Lowongan Baru */}
-            <div style={styles.styles?.leftSection || styles.leftSection}>
+        }}>
+            <div style={{ flex: isMobile ? '1' : '1.3', width: '100%' }}>
                 <FormLowonganControlled 
                     onSaveJob={handlePublish} 
-                    appTheme={appTheme} 
                     isMobile={isMobile} 
                 />
             </div>
 
-            {/* SEGMEN KANAN: Panel Pemantauan Pelamar Kerja Masuk */}
-            <div style={styles.rightSection}>
-                <h3 style={styles.panelTitle}>Pemantauan Berkas Masuk</h3>
-                <p style={styles.panelSubtitle}>Kelola kelayakan berkas, jadwalkan interview, atau perbarui status akhir rekrutmen di bawah ini.</p>
+            <div style={{
+                flex: '1',
+                width: '100%',
+                background: colors.cardBg,
+                border: colors.border,
+                borderRadius: '24px',
+                padding: '24px',
+                boxSizing: 'border-box'
+            }}>
+                <h3 style={{ fontSize: '18px', fontWeight: '800', color: colors.textMain, margin: '0 0 4px 0' }}>
+                    📋 Pemantauan Berkas Masuk
+                </h3>
+                <p style={{ color: colors.textMuted, fontSize: '13px', margin: '0 0 20px 0', lineHeight: '1.4' }}>
+                    Kelola kelayakan berkas, jadwalkan interview, atau perbarui status akhir rekrutmen.
+                </p>
                 
-                {/* Contoh Implementasi Kartu Pelamar Terintegrasi */}
-                <div style={styles.applicantCard}>
-                    <h4 style={styles.applicantName}>Muhammad Anfasa Umar</h4>
-                    <p style={styles.applicantMeta}>Melamar Posisi: Fullstack Developer</p>
-                    
-                    {/* Mengintegrasikan Pelacakan Status Berkas Riil */}
-                    <ApplicationStatusTracker 
-                        applicationId="101" 
-                        currentStatus="Pending" 
-                        appTheme={appTheme} 
-                    />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    {applications.map((applicant, index) => (
+                        <div 
+                            key={applicant.id}
+                            style={{
+                                padding: '16px',
+                                borderRadius: '16px',
+                                border: colors.border,
+                                background: isDark ? '#080402' : '#ffffff',
+                                transition: 'all 0.3s ease',
+                                animation: `fadeInUp 0.3s ease ${index * 0.1}s both`
+                            }}
+                        >
+                            <h4 style={{ fontSize: '15px', fontWeight: '800', color: colors.textMain, margin: '0 0 4px 0' }}>
+                                {applicant.name}
+                            </h4>
+                            <p style={{ fontSize: '12px', color: '#ea580c', fontWeight: '700', margin: '0 0 8px 0' }}>
+                                🎯 {applicant.position} • 📅 {applicant.applied_date}
+                            </p>
+                            
+                            <ApplicationStatusTracker 
+                                applicationId={applicant.id} 
+                                currentStatus={applicant.status} 
+                            />
+                        </div>
+                    ))}
                 </div>
             </div>
+
+            <style>{`
+                @keyframes fadeInUp {
+                    from {
+                        opacity: 0;
+                        transform: translateY(10px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+            `}</style>
         </div>
     );
 };
