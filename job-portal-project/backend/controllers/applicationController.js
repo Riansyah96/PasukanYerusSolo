@@ -3,28 +3,23 @@ const pool = require('../config/db');
 
 exports.applyJob = async (req, res, next) => {
     try {
-        
         const { id_lowongan, pesan_tambahan } = req.body;
         const pelamar_id = req.user?.id_user;
         
-        // Validasi user
         if (!pelamar_id) {
             return res.status(401).json({ message: 'User tidak terautentikasi' });
         }
         
-        // Validasi id_lowongan
         if (!id_lowongan) {
             return res.status(400).json({ message: 'ID Lowongan harus disertakan' });
         }
         
-        // Validasi file CV
         if (!req.file) {
             return res.status(400).json({ message: 'File CV wajib diupload' });
         }
         
         const cv_file = req.file.filename;
         
-        // Cek apakah lowongan tersedia
         const [lowonganCheck] = await pool.query(
             'SELECT * FROM lowongan WHERE id_lowongan = ?',
             [id_lowongan]
@@ -34,7 +29,6 @@ exports.applyJob = async (req, res, next) => {
             return res.status(404).json({ message: 'Lowongan tidak ditemukan' });
         }
         
-        // Cek apakah sudah pernah melamar
         const [existingLamaran] = await pool.query(
             'SELECT * FROM lamaran WHERE id_user = ? AND id_lowongan = ?',
             [pelamar_id, id_lowongan]
@@ -44,12 +38,10 @@ exports.applyJob = async (req, res, next) => {
             return res.status(400).json({ message: 'Anda sudah pernah melamar ke lowongan ini' });
         }
         
-        // Simpan lamaran
         const [result] = await pool.query(
             "INSERT INTO lamaran (id_user, id_lowongan, pesan_tambahan, status) VALUES (?, ?, ?, 'Menunggu')",
             [pelamar_id, id_lowongan, pesan_tambahan || '']
         );
-        
         
         res.status(201).json({ 
             status: "success", 
@@ -77,12 +69,41 @@ exports.addFavorite = async (req, res, next) => {
 exports.updateStatus = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { status } = req.body; 
-        await pool.query("UPDATE lamaran SET status = ? WHERE id_lamaran = ?", [status, id]);
-        res.json({ status: "success", message: "Status lamaran diperbarui" });
+        const { status } = req.body;
+        
+        console.log('=== UPDATE STATUS ===');
+        console.log('ID Lamaran:', id);
+        console.log('Status baru:', status);
+        
+        // Validasi status - pastikan sesuai dengan enum di database
+        const validStatus = ['Menunggu', 'Review', 'Interview', 'Lolos', 'Gagal'];
+        
+        // Cek apakah status yang dikirim valid
+        if (!validStatus.includes(status)) {
+            console.log('Status tidak valid:', status);
+            return res.status(400).json({ 
+                message: 'Status tidak valid. Gunakan: ' + validStatus.join(', ') 
+            });
+        }
+        
+        // Update status
+        const [result] = await pool.query(
+            'UPDATE lamaran SET status = ? WHERE id_lamaran = ?',
+            [status, id]
+        );
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Lamaran tidak ditemukan' });
+        }
+        
+        console.log('Status updated successfully. Affected rows:', result.affectedRows);
+        res.json({ 
+            status: "success", 
+            message: "Status lamaran diperbarui menjadi " + status 
+        });
     } catch (err) { 
         console.error('Update status error:', err);
-        next(err); 
+        res.status(500).json({ message: 'Terjadi kesalahan server' });
     }
 };
 

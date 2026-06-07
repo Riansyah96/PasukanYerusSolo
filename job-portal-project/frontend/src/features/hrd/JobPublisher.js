@@ -13,23 +13,18 @@ const JobPublisher = ({ isMobile }) => {
     useEffect(() => {
         const fetchApplications = async () => {
             try {
-                const response = await api.get('/hrd/applications');
+                // Gunakan endpoint yang benar
+                const response = await api.get('/auth/hrd/applications');
+                console.log('Applications response:', response.data);
+                
                 if (response.data && response.data.length > 0) {
                     setApplications(response.data);
                 } else {
-                    setApplications([
-                        { id: '101', name: 'Muhammad Anfasa Umar', position: 'Fullstack Developer', status: 'Pending', applied_date: '2026-06-01' },
-                        { id: '102', name: 'Siti Nurhaliza', position: 'Frontend Engineer', status: 'Interview', applied_date: '2026-05-28' },
-                        { id: '103', name: 'Budi Santoso', position: 'Backend Developer', status: 'Lolos', applied_date: '2026-05-25' }
-                    ]);
+                    setApplications([]);
                 }
             } catch (err) {
                 console.error("Gagal memuat lamaran:", err);
-                setApplications([
-                    { id: '101', name: 'Muhammad Anfasa Umar', position: 'Fullstack Developer', status: 'Pending', applied_date: '2026-06-01' },
-                    { id: '102', name: 'Siti Nurhaliza', position: 'Frontend Engineer', status: 'Interview', applied_date: '2026-05-28' },
-                    { id: '103', name: 'Budi Santoso', position: 'Backend Developer', status: 'Lolos', applied_date: '2026-05-25' }
-                ]);
+                setApplications([]);
             } finally {
                 setLoading(false);
             }
@@ -39,7 +34,7 @@ const JobPublisher = ({ isMobile }) => {
 
     const handlePublish = async (jobData) => {
         try {
-            const response = await api.post('/hrd/lowongan', jobData);
+            const response = await api.post('/auth/hrd/jobs', jobData);
             if (response.data.status === 'success') {
                 alert('✅ Sukses: ' + response.data.message);
             }
@@ -58,7 +53,22 @@ const JobPublisher = ({ isMobile }) => {
     if (loading) {
         return (
             <div style={{ textAlign: 'center', padding: '60px', color: colors.textMuted }}>
-                ⏳ Memuat dashboard...
+                <div style={{
+                    width: '40px',
+                    height: '40px',
+                    border: `3px solid ${colors.border}`,
+                    borderTop: `3px solid #ea580c`,
+                    borderRadius: '50%',
+                    margin: '0 auto 16px auto',
+                    animation: 'spin 1s linear infinite'
+                }} />
+                <p>⏳ Memuat dashboard...</p>
+                <style>{`
+                    @keyframes spin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }
+                `}</style>
             </div>
         );
     }
@@ -97,33 +107,43 @@ const JobPublisher = ({ isMobile }) => {
                     Kelola kelayakan berkas, jadwalkan interview, atau perbarui status akhir rekrutmen.
                 </p>
                 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                    {applications.map((applicant, index) => (
-                        <div 
-                            key={applicant.id}
-                            style={{
-                                padding: '16px',
-                                borderRadius: '16px',
-                                border: colors.border,
-                                background: isDark ? '#080402' : '#ffffff',
-                                transition: 'all 0.3s ease',
-                                animation: `fadeInUp 0.3s ease ${index * 0.1}s both`
-                            }}
-                        >
-                            <h4 style={{ fontSize: '15px', fontWeight: '800', color: colors.textMain, margin: '0 0 4px 0' }}>
-                                {applicant.name}
-                            </h4>
-                            <p style={{ fontSize: '12px', color: '#ea580c', fontWeight: '700', margin: '0 0 8px 0' }}>
-                                🎯 {applicant.position} • 📅 {applicant.applied_date}
-                            </p>
-                            
-                            <ApplicationStatusTracker 
-                                applicationId={applicant.id} 
-                                currentStatus={applicant.status} 
-                            />
-                        </div>
-                    ))}
-                </div>
+                {applications.length > 0 ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        {applications.map((applicant, index) => (
+                            <div 
+                                key={applicant.id_lamaran || index}
+                                style={{
+                                    padding: '16px',
+                                    borderRadius: '16px',
+                                    border: colors.border,
+                                    background: isDark ? '#080402' : '#ffffff',
+                                    transition: 'all 0.3s ease',
+                                    animation: `fadeInUp 0.3s ease ${index * 0.1}s both`
+                                }}
+                            >
+                                <h4 style={{ fontSize: '15px', fontWeight: '800', color: colors.textMain, margin: '0 0 4px 0' }}>
+                                    {applicant.nama_pelamar || 'Pelamar'}
+                                </h4>
+                                <p style={{ fontSize: '12px', color: '#ea580c', fontWeight: '700', margin: '0 0 8px 0' }}>
+                                    🎯 {applicant.judul_posisi} • 📅 {new Date(applicant.tanggal_melamar).toLocaleDateString('id-ID')}
+                                </p>
+                                <p style={{ fontSize: '11px', color: colors.textMuted, margin: '0 0 8px 0' }}>
+                                    📧 {applicant.email_pelamar} • 📞 {applicant.telepon || '-'}
+                                </p>
+                                
+                                <ApplicationStatusTracker 
+                                    applicationId={applicant.id_lamaran} 
+                                    currentStatus={applicant.status || 'Menunggu'} 
+                                />
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div style={{ textAlign: 'center', padding: '40px', color: colors.textMuted }}>
+                        <span style={{ fontSize: '48px', display: 'block', marginBottom: '16px' }}>📭</span>
+                        <p>Belum ada lamaran masuk</p>
+                    </div>
+                )}
             </div>
 
             <style>{`

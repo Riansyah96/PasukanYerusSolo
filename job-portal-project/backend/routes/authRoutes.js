@@ -5,6 +5,8 @@ const authController = require('../controllers/authController');
 const auth = require('../middleware/auth');
 const authorize = require('../middleware/authorize');
 const upload = require('../middleware/upload');
+const HRDController = require('../controllers/HRDController');
+const applicationController = require('../controllers/applicationController');
 
 // --- AUTHENTICATION ---
 router.post('/register', authController.register);
@@ -21,6 +23,10 @@ router.put('/profile', auth, upload.fields([
 router.get('/jobs', auth, authController.getAllJobs);
 router.post('/hrd/jobs', auth, authorize('Perusahaan'), authController.createJob);
 router.delete('/hrd/jobs/:id', auth, authorize('Perusahaan'), authController.deleteJob);
+
+// --- HRD APPLICATIONS ---
+router.get('/hrd/applications', auth, authorize('Perusahaan'), HRDController.getApplications);
+router.patch('/hrd/lamaran/:id', auth, authorize('Perusahaan'), applicationController.updateStatus);
 
 // --- LAMARAN ---
 router.post('/apply', auth, authorize('Pelamar'), upload.single('cv'), authController.applyJob);

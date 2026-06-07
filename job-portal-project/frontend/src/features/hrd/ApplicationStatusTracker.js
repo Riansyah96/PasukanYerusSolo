@@ -12,11 +12,12 @@ const ApplicationStatusTracker = ({ applicationId, currentStatus, appTheme }) =>
         if (isUpdating) return;
         setIsUpdating(true);
         try {
-            const response = await api.patch(`/hrd/lamaran/${applicationId}`, { status: newStatus });
+            const response = await api.patch(`/auth/hrd/lamaran/${applicationId}`, { status: newStatus });
             setStatus(newStatus);
-            alert(response.data.message || '✅ Status pelamar berhasil diperbarui');
+            alert('✅ ' + (response.data.message || 'Status pelamar berhasil diperbarui'));
         } catch (err) {
-            alert('❌ Gagal memperbarui status pelamar');
+            console.error('Error updating status:', err);
+            alert('❌ Gagal memperbarui status pelamar: ' + (err.response?.data?.message || err.message));
         } finally {
             setIsUpdating(false);
         }
@@ -26,7 +27,8 @@ const ApplicationStatusTracker = ({ applicationId, currentStatus, appTheme }) =>
         switch(currentViewStatus) {
             case 'Lolos': return { bg: '#dcfce7', text: '#15803d', icon: '✅' };
             case 'Interview': return { bg: '#fef9c3', text: '#a16207', icon: '🗣️' };
-            case 'Ditolak': return { bg: '#fee2e2', text: '#b91c1c', icon: '❌' };
+            case 'Gagal': return { bg: '#fee2e2', text: '#b91c1c', icon: '❌' };
+            case 'Review': return { bg: '#fef3c7', text: '#b45309', icon: '📋' };
             default: return { bg: isDark ? '#2e1d11' : '#f3e8ff', text: '#ea580c', icon: '🕒' };
         }
     };
@@ -93,10 +95,11 @@ const ApplicationStatusTracker = ({ applicationId, currentStatus, appTheme }) =>
                     }}
                     disabled={isUpdating}
                 >
-                    <option value="Pending">🕒 Pending</option>
+                    <option value="Menunggu">🕒 Menunggu</option>
+                    <option value="Review">📋 Review</option>
                     <option value="Interview">🗣️ Interview</option>
                     <option value="Lolos">✅ Lolos</option>
-                    <option value="Ditolak">❌ Ditolak</option>
+                    <option value="Gagal">❌ Gagal</option>
                 </select>
                 {isUpdating && <span style={{ fontSize: '12px', color: colors.accent }}>Menyimpan...</span>}
             </div>
