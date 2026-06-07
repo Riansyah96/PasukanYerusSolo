@@ -2,30 +2,53 @@ import React, { useState, useContext } from 'react';
 import api from '../../services/api';
 import { ThemeContext } from '../../context/ThemeContext';
 
-const ApplyJobForm = ({ jobId, onFormSuccess }) => {
+const ApplyJobForm = ({ jobId, onFormSuccess, onSuccess, onError }) => {
     const { theme } = useContext(ThemeContext);
     const isDark = theme === 'dark';
     const [fileCv, setFileCv] = useState(null);
     const [pesan, setPesan] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [fileName, setFileName] = useState('');
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
-        if (file && file.type !== 'application/pdf') {
-            alert('Hanya file PDF yang diperbolehkan!');
+        console.log('File selected:', file?.name);
+        
+        if (!file) {
+            setFileCv(null);
+            setFileName('');
             return;
         }
-        if (file && file.size > 2 * 1024 * 1024) {
-            alert('Ukuran file maksimal 2MB!');
+        
+        if (file.type !== 'application/pdf') {
+            alert('❌ Hanya file PDF yang diperbolehkan!');
+            e.target.value = '';
+            setFileCv(null);
+            setFileName('');
             return;
         }
+        
+        if (file.size > 2 * 1024 * 1024) {
+            alert('❌ Ukuran file maksimal 2MB!');
+            e.target.value = '';
+            setFileCv(null);
+            setFileName('');
+            return;
+        }
+        
         setFileCv(file);
+        setFileName(file.name);
     };
 
     const handleApply = async (e) => {
         e.preventDefault();
+        
+        console.log('=== FORM SUBMIT ===');
+        console.log('jobId:', jobId);
+        console.log('fileCv:', fileCv?.name);
+        
         if (!fileCv) {
-            alert('Silahkan lampirkan berkas CV!');
+            alert('❌ Silahkan pilih file CV anda terlebih dahulu!');
             return;
         }
 
@@ -36,15 +59,40 @@ const ApplyJobForm = ({ jobId, onFormSuccess }) => {
         formData.append('cv', fileCv);
 
         try {
+            console.log('Sending POST to /apply...');
             const response = await api.post('/apply', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
-            alert(response.data.message || 'Lamaran berhasil dikirim!');
+            
+            console.log('Response success:', response.data);
+            
+            alert('✅ ' + (response.data.message || 'Lamaran berhasil dikirim!'));
+            
+            // Reset form
             setFileCv(null);
+            setFileName('');
             setPesan('');
+            const fileInput = document.querySelector('input[type="file"]');
+            if (fileInput) fileInput.value = '';
+            
+            if (onSuccess) onSuccess(response.data.message);
             if (onFormSuccess) onFormSuccess();
+            
         } catch (err) {
-            alert(err.response?.data?.message || 'Gagal mengirim berkas');
+            console.error('Error details:', err);
+            console.error('Response status:', err.response?.status);
+            console.error('Response data:', err.response?.data);
+            
+            let errorMsg = 'Gagal mengirim lamaran';
+            if (err.response?.data?.message) {
+                errorMsg = err.response.data.message;
+            } else if (err.message) {
+                errorMsg = err.message;
+            }
+            
+            alert('❌ ' + errorMsg);
+            
+            if (onError) onError(errorMsg);
         } finally {
             setIsSubmitting(false);
         }
@@ -86,7 +134,8 @@ const ApplyJobForm = ({ jobId, onFormSuccess }) => {
             border: `1px solid ${isDark ? '#3d2514' : '#eaddd3'}`,
             background: isDark ? '#0d0703' : '#ffffff',
             color: isDark ? '#fef3c7' : '#291107',
-            cursor: 'pointer'
+            cursor: 'pointer',
+            transition: 'all 0.3s ease'
         },
         textarea: {
             width: '100%',
@@ -117,7 +166,17 @@ const ApplyJobForm = ({ jobId, onFormSuccess }) => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '8px'
+            gap: '8px',
+            opacity: isSubmitting ? 0.7 : 1
+        },
+        fileName: {
+            fontSize: '11px',
+            marginTop: '-8px',
+            marginBottom: '12px',
+            color: isDark ? '#86efac' : '#166534',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px'
         }
     };
 
@@ -135,6 +194,12 @@ const ApplyJobForm = ({ jobId, onFormSuccess }) => {
                 required 
                 style={styles.input}
             />
+            
+            {fileName && (
+                <div style={styles.fileName}>
+                    <span>✅</span> File siap: {fileName}
+                </div>
+            )}
             
             <textarea 
                 placeholder="Pesan tambahan untuk HRD (opsional)..." 
@@ -156,15 +221,25 @@ const ApplyJobForm = ({ jobId, onFormSuccess }) => {
                 style={styles.button}
                 disabled={isSubmitting}
                 onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 6px 20px rgba(234,88,12,0.4)';
+                    if (!isSubmitting) {
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                        e.currentTarget.style.boxShadow = '0 6px 20px rgba(234,88,12,0.4)';
+                    }
                 }}
                 onMouseLeave={(e) => {
                     e.currentTarget.style.transform = 'translateY(0)';
                     e.currentTarget.style.boxShadow = 'none';
                 }}
             >
-                {isSubmitting ? '⏳ Mengirim...' : '🚀 Upload & Kirim Berkas'}
+                {isSubmitting ? (
+                    <>
+                        <span>⏳</span> Mengirim...
+                    </>
+                ) : (
+                    <>
+                        <span>🚀</span> Kirim Lamaran
+                    </>
+                )}
             </button>
         </form>
     );

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ThemeContext } from '../../context/ThemeContext';
+import Modal from '../Modal/Modal';
 
 const Navbar = ({ isAuthenticated, handleLogout, userRole }) => {
     const navigate = useNavigate();
@@ -11,12 +12,10 @@ const Navbar = ({ isAuthenticated, handleLogout, userRole }) => {
     const [scrolled, setScrolled] = useState(false);
     const [logoHovered, setLogoHovered] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
 
     const isDark = theme === 'dark';
-
-    // Debug: Log role untuk memastikan
-    useEffect(() => {
-        }, [isAuthenticated, userRole]);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -42,6 +41,19 @@ const Navbar = ({ isAuthenticated, handleLogout, userRole }) => {
         setMobileMenuOpen(false);
     };
 
+    const handleLogoutClick = () => {
+        setShowLogoutModal(true);
+    };
+
+    const confirmLogout = () => {
+        handleLogout();
+        setShowLogoutModal(false);
+        setShowSuccessModal(true);
+        setTimeout(() => {
+            setShowSuccessModal(false);
+        }, 2000);
+    };
+
     const getMenuStyle = (menuPath) => ({
         background: 'none', 
         border: 'none',
@@ -57,174 +69,29 @@ const Navbar = ({ isAuthenticated, handleLogout, userRole }) => {
         textAlign: isMobile ? 'center' : 'left'
     });
 
-    // Menu items berdasarkan role - PASTIKAN ROLE SESUAI
-    const renderRoleBasedMenu = () => {
-        
-        if (!isAuthenticated) return null;
-
-        // Gunakan toLowerCase untuk membandingkan role
-        const roleLower = userRole?.toLowerCase();
-        
-        // Role PERUSAHAAN
-        if (roleLower === 'perusahaan' || userRole === 'Perusahaan') {
-            return (
-                <>
-                    <button 
-                        onClick={() => navigateTo('/hrd/dashboard')}
-                        style={{
-                            background: 'none',
-                            border: 'none',
-                            color: hoveredMenu === '/hrd/dashboard' ? '#ea580c' : (isDark ? '#fff' : '#1c1917'),
-                            fontWeight: '700',
-                            cursor: 'pointer',
-                            fontSize: isMobile ? '18px' : '14px',
-                            transition: 'all 0.3s ease',
-                            padding: isMobile ? '12px 0' : '8px 0',
-                            width: isMobile ? '100%' : 'auto',
-                            textAlign: isMobile ? 'center' : 'left'
-                        }}
-                        onMouseEnter={() => setHoveredMenu('/hrd/dashboard')}
-                        onMouseLeave={() => setHoveredMenu(null)}
-                    >
-                        📊 Dashboard HRD
-                    </button>
-                    <button 
-                        onClick={() => navigateTo('/hrd/branding')}
-                        style={{
-                            background: 'none',
-                            border: 'none',
-                            color: hoveredMenu === '/hrd/branding' ? '#ea580c' : (isDark ? '#fff' : '#1c1917'),
-                            fontWeight: '700',
-                            cursor: 'pointer',
-                            fontSize: isMobile ? '18px' : '14px',
-                            transition: 'all 0.3s ease',
-                            padding: isMobile ? '12px 0' : '8px 0',
-                            width: isMobile ? '100%' : 'auto',
-                            textAlign: isMobile ? 'center' : 'left'
-                        }}
-                        onMouseEnter={() => setHoveredMenu('/hrd/branding')}
-                        onMouseLeave={() => setHoveredMenu(null)}
-                    >
-                        🎨 Branding
-                    </button>
-                    <button 
-                        onClick={() => navigateTo('/status-lamaran')}
-                        style={{
-                            background: 'none',
-                            border: 'none',
-                            color: hoveredMenu === '/status-lamaran' ? '#ea580c' : (isDark ? '#fff' : '#1c1917'),
-                            fontWeight: '700',
-                            cursor: 'pointer',
-                            fontSize: isMobile ? '18px' : '14px',
-                            transition: 'all 0.3s ease',
-                            padding: isMobile ? '12px 0' : '8px 0',
-                            width: isMobile ? '100%' : 'auto',
-                            textAlign: isMobile ? 'center' : 'left'
-                        }}
-                        onMouseEnter={() => setHoveredMenu('/status-lamaran')}
-                        onMouseLeave={() => setHoveredMenu(null)}
-                    >
-                        📋 Status Lamaran
-                    </button>
-                </>
-            );
-        }
-        
-        // Role PELAMAR
-        if (roleLower === 'pelamar' || userRole === 'Pelamar') {
-            return (
-                <>
-                    <button 
-                        onClick={() => navigateTo('/favorit')}
-                        style={{
-                            background: 'none',
-                            border: 'none',
-                            color: hoveredMenu === '/favorit' ? '#ea580c' : (isDark ? '#fff' : '#1c1917'),
-                            fontWeight: '700',
-                            cursor: 'pointer',
-                            fontSize: isMobile ? '18px' : '14px',
-                            transition: 'all 0.3s ease',
-                            padding: isMobile ? '12px 0' : '8px 0',
-                            width: isMobile ? '100%' : 'auto',
-                            textAlign: isMobile ? 'center' : 'left'
-                        }}
-                        onMouseEnter={() => setHoveredMenu('/favorit')}
-                        onMouseLeave={() => setHoveredMenu(null)}
-                    >
-                        ⭐ Favorit Saya
-                    </button>
-                    <button 
-                        onClick={() => navigateTo('/status-lamaran')}
-                        style={{
-                            background: 'none',
-                            border: 'none',
-                            color: hoveredMenu === '/status-lamaran' ? '#ea580c' : (isDark ? '#fff' : '#1c1917'),
-                            fontWeight: '700',
-                            cursor: 'pointer',
-                            fontSize: isMobile ? '18px' : '14px',
-                            transition: 'all 0.3s ease',
-                            padding: isMobile ? '12px 0' : '8px 0',
-                            width: isMobile ? '100%' : 'auto',
-                            textAlign: isMobile ? 'center' : 'left'
-                        }}
-                        onMouseEnter={() => setHoveredMenu('/status-lamaran')}
-                        onMouseLeave={() => setHoveredMenu(null)}
-                    >
-                        📋 Status Lamaran
-                    </button>
-                    <button 
-                        onClick={() => navigateTo('/profile')}
-                        style={{
-                            background: 'none',
-                            border: 'none',
-                            color: hoveredMenu === '/profile' ? '#ea580c' : (isDark ? '#fff' : '#1c1917'),
-                            fontWeight: '700',
-                            cursor: 'pointer',
-                            fontSize: isMobile ? '18px' : '14px',
-                            transition: 'all 0.3s ease',
-                            padding: isMobile ? '12px 0' : '8px 0',
-                            width: isMobile ? '100%' : 'auto',
-                            textAlign: isMobile ? 'center' : 'left'
-                        }}
-                        onMouseEnter={() => setHoveredMenu('/profile')}
-                        onMouseLeave={() => setHoveredMenu(null)}
-                    >
-                        👤 Profil Saya
-                    </button>
-                </>
-            );
-        }
-        
-        // Role ADMIN
-        if (roleLower === 'admin' || userRole === 'Admin') {
-            return (
-                <button 
-                    onClick={() => navigateTo('/admin/dashboard')}
-                    style={{
-                        background: 'none',
-                        border: 'none',
-                        color: hoveredMenu === '/admin/dashboard' ? '#ea580c' : (isDark ? '#fff' : '#1c1917'),
-                        fontWeight: '700',
-                        cursor: 'pointer',
-                        fontSize: isMobile ? '18px' : '14px',
-                        transition: 'all 0.3s ease',
-                        padding: isMobile ? '12px 0' : '8px 0',
-                        width: isMobile ? '100%' : 'auto',
-                        textAlign: isMobile ? 'center' : 'left'
-                    }}
-                    onMouseEnter={() => setHoveredMenu('/admin/dashboard')}
-                    onMouseLeave={() => setHoveredMenu(null)}
-                >
-                    ⚙️ Admin Panel
-                </button>
-            );
-        }
-        
-        return null;
-    };
+    // Rest of the component remains the same until the logout button...
 
     return (
         <>
+            {/* Logout Confirmation Modal */}
+            <Modal
+                isOpen={showLogoutModal}
+                onClose={() => setShowLogoutModal(false)}
+                title="Konfirmasi Logout"
+                message="Apakah Anda yakin ingin keluar dari akun Anda?"
+                type="warning"
+                onConfirm={confirmLogout}
+            />
+
+            {/* Success Logout Modal */}
+            <Modal
+                isOpen={showSuccessModal}
+                onClose={() => setShowSuccessModal(false)}
+                title="Berhasil Logout"
+                message="Anda telah berhasil keluar dari akun. Sampai jumpa kembali!"
+                type="success"
+            />
+
             <nav style={{ 
                 display: 'flex', 
                 justifyContent: 'space-between', 
@@ -370,8 +237,100 @@ const Navbar = ({ isAuthenticated, handleLogout, userRole }) => {
                         )}
                     </button>
                     
-                    {/* Role-based menu untuk desktop */}
-                    {renderRoleBasedMenu()}
+                    {/* Role-based menu */}
+                    {isAuthenticated && userRole === 'Perusahaan' && (
+                        <>
+                            <button 
+                                onClick={() => navigateTo('/hrd/dashboard')}
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    color: hoveredMenu === '/hrd/dashboard' ? '#ea580c' : (isDark ? '#fff' : '#1c1917'),
+                                    fontWeight: '700',
+                                    cursor: 'pointer',
+                                    fontSize: '14px',
+                                    transition: 'all 0.3s ease',
+                                    padding: '8px 0'
+                                }}
+                                onMouseEnter={() => setHoveredMenu('/hrd/dashboard')}
+                                onMouseLeave={() => setHoveredMenu(null)}
+                            >
+                                Dashboard
+                            </button>
+                            <button 
+                                onClick={() => navigateTo('/hrd/branding')}
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    color: hoveredMenu === '/hrd/branding' ? '#ea580c' : (isDark ? '#fff' : '#1c1917'),
+                                    fontWeight: '700',
+                                    cursor: 'pointer',
+                                    fontSize: '14px',
+                                    transition: 'all 0.3s ease',
+                                    padding: '8px 0'
+                                }}
+                                onMouseEnter={() => setHoveredMenu('/hrd/branding')}
+                                onMouseLeave={() => setHoveredMenu(null)}
+                            >
+                                Branding
+                            </button>
+                        </>
+                    )}
+                    {isAuthenticated && userRole === 'Pelamar' && (
+                        <>
+                            <button 
+                                onClick={() => navigateTo('/favorit')}
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    color: hoveredMenu === '/favorit' ? '#ea580c' : (isDark ? '#fff' : '#1c1917'),
+                                    fontWeight: '700',
+                                    cursor: 'pointer',
+                                    fontSize: '14px',
+                                    transition: 'all 0.3s ease',
+                                    padding: '8px 0'
+                                }}
+                                onMouseEnter={() => setHoveredMenu('/favorit')}
+                                onMouseLeave={() => setHoveredMenu(null)}
+                            >
+                                Favorit
+                            </button>
+                            <button 
+                                onClick={() => navigateTo('/status-lamaran')}
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    color: hoveredMenu === '/status-lamaran' ? '#ea580c' : (isDark ? '#fff' : '#1c1917'),
+                                    fontWeight: '700',
+                                    cursor: 'pointer',
+                                    fontSize: '14px',
+                                    transition: 'all 0.3s ease',
+                                    padding: '8px 0'
+                                }}
+                                onMouseEnter={() => setHoveredMenu('/status-lamaran')}
+                                onMouseLeave={() => setHoveredMenu(null)}
+                            >
+                                Status Lamaran
+                            </button>
+                            <button 
+                                onClick={() => navigateTo('/profile')}
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    color: hoveredMenu === '/profile' ? '#ea580c' : (isDark ? '#fff' : '#1c1917'),
+                                    fontWeight: '700',
+                                    cursor: 'pointer',
+                                    fontSize: '14px',
+                                    transition: 'all 0.3s ease',
+                                    padding: '8px 0'
+                                }}
+                                onMouseEnter={() => setHoveredMenu('/profile')}
+                                onMouseLeave={() => setHoveredMenu(null)}
+                            >
+                                Profil
+                            </button>
+                        </>
+                    )}
                 </div>
 
                 {/* Right Section */}
@@ -407,7 +366,7 @@ const Navbar = ({ isAuthenticated, handleLogout, userRole }) => {
                         <>
                             {isAuthenticated ? (
                                 <button 
-                                    onClick={handleLogout} 
+                                    onClick={handleLogoutClick}
                                     style={{ 
                                         padding: '8px 20px', 
                                         borderRadius: '30px', 
@@ -571,8 +530,7 @@ const Navbar = ({ isAuthenticated, handleLogout, userRole }) => {
                             style={{
                                 ...getMenuStyle('/'),
                                 padding: '14px 20px',
-                                borderRadius: '12px',
-                                background: location.pathname === '/' && isDark ? 'rgba(234,88,12,0.1)' : location.pathname === '/' && !isDark ? 'rgba(234,88,12,0.05)' : 'transparent'
+                                borderRadius: '12px'
                             }}
                         >
                             🏠 Beranda
@@ -582,46 +540,35 @@ const Navbar = ({ isAuthenticated, handleLogout, userRole }) => {
                             style={{
                                 ...getMenuStyle('/eksplorasi'),
                                 padding: '14px 20px',
-                                borderRadius: '12px',
-                                background: location.pathname === '/eksplorasi' && isDark ? 'rgba(234,88,12,0.1)' : location.pathname === '/eksplorasi' && !isDark ? 'rgba(234,88,12,0.05)' : 'transparent'
+                                borderRadius: '12px'
                             }}
                         >
                             🔍 Lowongan
                         </button>
                         
-                        {/* Role-based menu untuk mobile */}
-                        {isAuthenticated && (userRole?.toLowerCase() === 'perusahaan' || userRole === 'Perusahaan') && (
+                        {isAuthenticated && userRole === 'Perusahaan' && (
                             <>
-                                <button onClick={() => navigateTo('/hrd/dashboard')} style={{ ...getMenuStyle('/hrd/dashboard'), padding: '14px 20px', borderRadius: '12px' }}>
-                                    📊 Dashboard HRD
+                                <button onClick={() => navigateTo('/hrd/dashboard')} style={{ padding: '14px 20px', borderRadius: '12px', color: isDark ? '#fff' : '#1c1917', background: 'none', border: 'none', fontSize: '18px', fontWeight: '700' }}>
+                                    📊 Dashboard
                                 </button>
-                                <button onClick={() => navigateTo('/hrd/branding')} style={{ ...getMenuStyle('/hrd/branding'), padding: '14px 20px', borderRadius: '12px' }}>
+                                <button onClick={() => navigateTo('/hrd/branding')} style={{ padding: '14px 20px', borderRadius: '12px', color: isDark ? '#fff' : '#1c1917', background: 'none', border: 'none', fontSize: '18px', fontWeight: '700' }}>
                                     🎨 Branding
                                 </button>
-                                <button onClick={() => navigateTo('/status-lamaran')} style={{ ...getMenuStyle('/status-lamaran'), padding: '14px 20px', borderRadius: '12px' }}>
-                                    📋 Status Lamaran
-                                </button>
                             </>
                         )}
                         
-                        {isAuthenticated && (userRole?.toLowerCase() === 'pelamar' || userRole === 'Pelamar') && (
+                        {isAuthenticated && userRole === 'Pelamar' && (
                             <>
-                                <button onClick={() => navigateTo('/favorit')} style={{ ...getMenuStyle('/favorit'), padding: '14px 20px', borderRadius: '12px' }}>
-                                    ⭐ Favorit Saya
+                                <button onClick={() => navigateTo('/favorit')} style={{ padding: '14px 20px', borderRadius: '12px', color: isDark ? '#fff' : '#1c1917', background: 'none', border: 'none', fontSize: '18px', fontWeight: '700' }}>
+                                    ⭐ Favorit
                                 </button>
-                                <button onClick={() => navigateTo('/status-lamaran')} style={{ ...getMenuStyle('/status-lamaran'), padding: '14px 20px', borderRadius: '12px' }}>
+                                <button onClick={() => navigateTo('/status-lamaran')} style={{ padding: '14px 20px', borderRadius: '12px', color: isDark ? '#fff' : '#1c1917', background: 'none', border: 'none', fontSize: '18px', fontWeight: '700' }}>
                                     📋 Status Lamaran
                                 </button>
-                                <button onClick={() => navigateTo('/profile')} style={{ ...getMenuStyle('/profile'), padding: '14px 20px', borderRadius: '12px' }}>
-                                    👤 Profil Saya
+                                <button onClick={() => navigateTo('/profile')} style={{ padding: '14px 20px', borderRadius: '12px', color: isDark ? '#fff' : '#1c1917', background: 'none', border: 'none', fontSize: '18px', fontWeight: '700' }}>
+                                    👤 Profil
                                 </button>
                             </>
-                        )}
-                        
-                        {isAuthenticated && (userRole?.toLowerCase() === 'admin' || userRole === 'Admin') && (
-                            <button onClick={() => navigateTo('/admin/dashboard')} style={{ ...getMenuStyle('/admin/dashboard'), padding: '14px 20px', borderRadius: '12px' }}>
-                                ⚙️ Admin Panel
-                            </button>
                         )}
                         
                         <div style={{
@@ -631,7 +578,7 @@ const Navbar = ({ isAuthenticated, handleLogout, userRole }) => {
                         }}>
                             {isAuthenticated ? (
                                 <button 
-                                    onClick={handleLogout} 
+                                    onClick={handleLogoutClick}
                                     style={{ 
                                         width: '100%',
                                         padding: '14px 20px', 
@@ -673,10 +620,6 @@ const Navbar = ({ isAuthenticated, handleLogout, userRole }) => {
                 @keyframes slideIn {
                     from { transform: translateX(100%); }
                     to { transform: translateX(0); }
-                }
-                @keyframes pulse {
-                    0% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
-                    100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
                 }
                 @media (max-width: 768px) {
                     .nav-menu { display: none !important; }

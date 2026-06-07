@@ -11,22 +11,17 @@ export default function StatusTracker({ appTheme, isMobile }) {
     useEffect(() => {
         const fetchApplications = async () => {
             try {
-                const response = await api.get('/user/applications');
+                // Gunakan endpoint /api/lamaran
+                const response = await api.get('/lamaran');
+                
                 if (response.data && response.data.length > 0) {
                     setApplications(response.data);
                 } else {
-                    // Data dummy untuk demo
-                    setApplications([
-                        { id_lamaran: 'APP-001', title: 'Fullstack Developer', company: 'PasukanYerusSolo', applied_date: '2026-05-28', status: 'Diproses', pesan_hrd: 'Berkas CV Anda sedang ditinjau.' },
-                        { id_lamaran: 'APP-002', title: 'React Frontend Engineer', company: 'TechEase Indonesia', applied_date: '2026-05-15', status: 'Diterima', pesan_hrd: 'Selamat! Anda diundang interview.' }
-                    ]);
+                    setApplications([]);
                 }
             } catch (err) {
                 console.error("Gagal memuat lamaran:", err);
-                setApplications([
-                    { id_lamaran: 'APP-001', title: 'Fullstack Developer', company: 'PasukanYerusSolo', applied_date: '2026-05-28', status: 'Diproses', pesan_hrd: 'Berkas CV Anda sedang ditinjau.' },
-                    { id_lamaran: 'APP-002', title: 'React Frontend Engineer', company: 'TechEase Indonesia', applied_date: '2026-05-15', status: 'Diterima', pesan_hrd: 'Selamat! Anda diundang interview.' }
-                ]);
+                setApplications([]);
             } finally {
                 setLoading(false);
             }
@@ -36,12 +31,23 @@ export default function StatusTracker({ appTheme, isMobile }) {
 
     const getStatusBadge = (status) => {
         const statusMap = {
-            'Diproses': { bg: 'linear-gradient(135deg, #f59e0b, #ea580c)', text: '#fff', label: '🕒 Diproses' },
-            'Diterima': { bg: 'linear-gradient(135deg, #22c55e, #16a34a)', text: '#fff', label: '✅ Diterima' },
-            'Ditolak': { bg: 'linear-gradient(135deg, #ef4444, #dc2626)', text: '#fff', label: '❌ Ditolak' },
-            'Interview': { bg: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', text: '#fff', label: '🗣️ Interview' }
+            'Menunggu': { bg: 'linear-gradient(135deg, #6b7280, #4b5563)', text: '#fff', label: '🕒 Menunggu' },
+            'Review': { bg: 'linear-gradient(135deg, #f59e0b, #ea580c)', text: '#fff', label: '📋 Review' },
+            'Interview': { bg: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', text: '#fff', label: '🗣️ Interview' },
+            'Lolos': { bg: 'linear-gradient(135deg, #22c55e, #16a34a)', text: '#fff', label: '✅ Lolos' },
+            'Gagal': { bg: 'linear-gradient(135deg, #ef4444, #dc2626)', text: '#fff', label: '❌ Gagal' }
         };
-        return statusMap[status] || { bg: 'linear-gradient(135deg, #6b7280, #4b5563)', text: '#fff', label: '📋 Pending' };
+        return statusMap[status] || { bg: 'linear-gradient(135deg, #6b7280, #4b5563)', text: '#fff', label: '📋 Menunggu' };
+    };
+
+    const formatDate = (dateString) => {
+        if (!dateString) return 'Tanggal tidak tersedia';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('id-ID', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
     };
 
     const colors = {
@@ -55,7 +61,22 @@ export default function StatusTracker({ appTheme, isMobile }) {
     if (loading) {
         return (
             <div style={{ textAlign: 'center', padding: '60px', color: colors.textMuted }}>
-                ⏳ Memuat data lamaran...
+                <div style={{
+                    width: '40px',
+                    height: '40px',
+                    border: `3px solid ${colors.border}`,
+                    borderTop: `3px solid ${colors.accent}`,
+                    borderRadius: '50%',
+                    margin: '0 auto 16px auto',
+                    animation: 'spin 1s linear infinite'
+                }} />
+                <p>⏳ Memuat data lamaran...</p>
+                <style>{`
+                    @keyframes spin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }
+                `}</style>
             </div>
         );
     }
@@ -95,15 +116,15 @@ export default function StatusTracker({ appTheme, isMobile }) {
                         >
                             <div style={{ flex: 1 }}>
                                 <h3 style={{ margin: '0 0 4px 0', color: colors.textMain, fontSize: isMobile ? '16px' : '18px', fontWeight: '700' }}>
-                                    {app.title}
+                                    {app.judul_posisi}
                                 </h3>
                                 <p style={{ margin: '0 0 12px 0', color: '#ea580c', fontWeight: '600', fontSize: '13px' }}>
-                                    {app.company}
+                                    {app.nama_perusahaan || 'Perusahaan'}
                                 </p>
                                 <p style={{ margin: '0', fontSize: '12px', color: colors.textMuted }}>
-                                    📅 Melamar pada: {app.applied_date}
+                                    📅 Melamar pada: {formatDate(app.tanggal_melamar)}
                                 </p>
-                                {app.pesan_hrd && (
+                                {app.pesan_tambahan && (
                                     <div style={{ 
                                         marginTop: '12px', 
                                         padding: '10px 14px', 
@@ -113,7 +134,7 @@ export default function StatusTracker({ appTheme, isMobile }) {
                                         color: colors.textMuted, 
                                         borderLeft: `2px solid #ea580c` 
                                     }}>
-                                        💬 {app.pesan_hrd}
+                                        💬 {app.pesan_tambahan}
                                     </div>
                                 )}
                             </div>

@@ -231,8 +231,6 @@ const App = () => {
     const handleLoginSuccess = () => {
         const token = localStorage.getItem('token');
         const role = localStorage.getItem('role');
-        console.log('handleLoginSuccess - token:', !!token);
-        console.log('handleLoginSuccess - role from storage:', role);
         
         setIsAuthenticated(!!token);
         setUserRole(role);

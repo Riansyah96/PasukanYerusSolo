@@ -8,6 +8,7 @@ const authRoutes = require('./routes/authRoutes');
 const jobRoutes = require('./routes/jobRoutes');
 const favoritRoutes = require('./routes/favoritRoutes');
 const applyRoutes = require('./routes/applyRoutes');
+const lamaranRoutes = require('./routes/lamaranRoutes');
 const errorMiddleware = require('./middleware/errorMiddleware');
 
 app.use(cors());
@@ -20,6 +21,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/jobs', jobRoutes);
 app.use('/api/favorit', favoritRoutes);
 app.use('/api/apply', applyRoutes);
+app.use('/api/lamaran', lamaranRoutes);  // Tambahkan route ini
 
 app.use(errorMiddleware);
 

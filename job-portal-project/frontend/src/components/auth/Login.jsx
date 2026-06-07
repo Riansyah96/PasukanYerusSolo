@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ThemeContext } from '../../context/ThemeContext';
 import api from '../../services/api';
+import Modal from '../Modal/Modal';
 
 const Login = ({ onLoginSuccess }) => {
     const navigate = useNavigate();
@@ -11,31 +12,25 @@ const Login = ({ onLoginSuccess }) => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+    const [modalMessage, setModalMessage] = useState({ title: '', message: '', type: 'success' });
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
+        setError('');
     };
 
-    // Fungsi untuk decode JWT token dan mengambil role
-    const decodeToken = (token) => {
-        try {
-            const base64Url = token.split('.')[1];
-            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            }).join(''));
-            return JSON.parse(jsonPayload);
-        } catch (error) {
-            console.error('Error decoding token:', error);
-            return null;
-        }
+    const showNotification = (title, message, type = 'success') => {
+        setModalMessage({ title, message, type });
+        setShowModal(true);
+        setTimeout(() => setShowModal(false), 3000);
     };
 
-    // Di Login.jsx, pastikan token tersimpan dengan benar
     const handleLogin = async (e) => {
         e.preventDefault();
         setError('');
         setLoading(true);
+        
         try {
             const res = await api.post('/auth/login', formData);
             
@@ -43,28 +38,23 @@ const Login = ({ onLoginSuccess }) => {
                 const token = res.data.token;
                 localStorage.setItem('token', token);
                 
-                // Ambil role dari response
                 let userRole = res.data.user?.role || res.data.role;
-                
                 if (userRole) {
                     localStorage.setItem('role', userRole);
                 }
                 
-                
-                // Verifikasi token bisa digunakan
-                try {
-                    const testResponse = await api.get('/favorit/cek/1');
-                } catch (testErr) {
-                }
+                showNotification('✅ Berhasil Login', `Selamat datang kembali!`, 'success');
                 
                 if (onLoginSuccess) onLoginSuccess();
-                navigate('/');
+                setTimeout(() => {
+                    navigate('/');
+                }, 2000);
             } else {
-                setError('Response tidak valid dari server');
+                showNotification('❌ Gagal Login', 'Response tidak valid dari server', 'error');
             }
         } catch (err) {
-            console.error('Login error:', err.response?.data);
-            setError(err.response?.data?.message || 'Email atau password salah!');
+            const errorMsg = err.response?.data?.message || 'Email atau password salah!';
+            showNotification('❌ Gagal Login', errorMsg, 'error');
         } finally {
             setLoading(false);
         }
@@ -207,119 +197,130 @@ const Login = ({ onLoginSuccess }) => {
     };
 
     return (
-        <div style={styles.container}>
-            <div style={styles.card}>
-                <div style={styles.brand}>
-                    <h1 style={styles.logo}>PasukanYerusSolo</h1>
-                    <div style={styles.subBrand}>Job Portal</div>
-                </div>
-                <h2 style={styles.title}>
-                    <span style={{ color: '#ea580c' }}>✨</span> Masuk Akun
-                </h2>
-                {error && <div style={styles.errorAlert}>{error}</div>}
-                <form onSubmit={handleLogin}>
-                    <label style={styles.label}>📧 Email</label>
-                    <div style={styles.inputWrapper}>
-                        <input 
-                            type="email" 
-                            name="email" 
-                            placeholder="nama@email.com"
-                            value={formData.email} 
-                            onChange={handleChange} 
-                            style={styles.input}
-                            required 
-                        />
+        <>
+            {/* Modal Notification */}
+            <Modal
+                isOpen={showModal}
+                onClose={() => setShowModal(false)}
+                title={modalMessage.title}
+                message={modalMessage.message}
+                type={modalMessage.type}
+            />
+
+            <div style={styles.container}>
+                <div style={styles.card}>
+                    <div style={styles.brand}>
+                        <h1 style={styles.logo}>PasukanYerusSolo</h1>
+                        <div style={styles.subBrand}>Job Portal</div>
                     </div>
-                    
-                    <label style={styles.label}>🔒 Password</label>
-                    <div style={styles.inputWrapper}>
-                        <input 
-                            type={showPassword ? "text" : "password"} 
-                            name="password" 
-                            placeholder="Masukkan password Anda"
-                            value={formData.password} 
-                            onChange={handleChange} 
-                            style={styles.input}
-                            required 
-                        />
-                        <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            style={styles.passwordToggle}
+                    <h2 style={styles.title}>
+                        <span style={{ color: '#ea580c' }}>✨</span> Masuk Akun
+                    </h2>
+                    {error && <div style={styles.errorAlert}>{error}</div>}
+                    <form onSubmit={handleLogin}>
+                        <label style={styles.label}>📧 Email</label>
+                        <div style={styles.inputWrapper}>
+                            <input 
+                                type="email" 
+                                name="email" 
+                                placeholder="nama@email.com"
+                                value={formData.email} 
+                                onChange={handleChange} 
+                                style={styles.input}
+                                required 
+                            />
+                        </div>
+                        
+                        <label style={styles.label}>🔒 Password</label>
+                        <div style={styles.inputWrapper}>
+                            <input 
+                                type={showPassword ? "text" : "password"} 
+                                name="password" 
+                                placeholder="Masukkan password Anda"
+                                value={formData.password} 
+                                onChange={handleChange} 
+                                style={styles.input}
+                                required 
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                style={styles.passwordToggle}
+                            >
+                                {showPassword ? '👁️' : '🔒'}
+                            </button>
+                        </div>
+                        
+                        <button 
+                            type="submit" 
+                            style={styles.btn} 
+                            disabled={loading}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                e.currentTarget.style.boxShadow = '0 8px 20px rgba(234, 88, 12, 0.4)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = 'none';
+                            }}
                         >
-                            {showPassword ? '👁️' : '🔒'}
+                            {loading ? '⏳ Memverifikasi...' : '🚀 Masuk Akun'}
                         </button>
-                    </div>
+                    </form>
                     
                     <button 
-                        type="submit" 
-                        style={styles.btn} 
-                        disabled={loading}
+                        type="button" 
+                        onClick={() => navigate('/')} 
+                        style={styles.btnGuest}
                         onMouseEnter={(e) => {
+                            e.currentTarget.style.background = '#ea580c';
+                            e.currentTarget.style.color = '#fff';
                             e.currentTarget.style.transform = 'translateY(-2px)';
-                            e.currentTarget.style.boxShadow = '0 8px 20px rgba(234, 88, 12, 0.4)';
                         }}
                         onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'transparent';
+                            e.currentTarget.style.color = '#ea580c';
                             e.currentTarget.style.transform = 'translateY(0)';
-                            e.currentTarget.style.boxShadow = 'none';
                         }}
                     >
-                        {loading ? '⏳ Memverifikasi...' : '🚀 Masuk Akun'}
+                        🔍 Jelajahi Sebagai Guest
                     </button>
-                </form>
-                
-                <button 
-                    type="button" 
-                    onClick={() => navigate('/')} 
-                    style={styles.btnGuest}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.background = '#ea580c';
-                        e.currentTarget.style.color = '#fff';
-                        e.currentTarget.style.transform = 'translateY(-2px)';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.background = 'transparent';
-                        e.currentTarget.style.color = '#ea580c';
-                        e.currentTarget.style.transform = 'translateY(0)';
-                    }}
-                >
-                    🔍 Jelajahi Sebagai Guest
-                </button>
-                
-                <p style={styles.footerText}>
-                    Belum punya akun? 
-                    <span 
-                        onClick={() => navigate('/register')} 
-                        style={styles.link}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.textDecoration = 'underline';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.textDecoration = 'none';
-                        }}
-                    >
-                        Daftar Sekarang
-                    </span>
-                </p>
+                    
+                    <p style={styles.footerText}>
+                        Belum punya akun? 
+                        <span 
+                            onClick={() => navigate('/register')} 
+                            style={styles.link}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.textDecoration = 'underline';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.textDecoration = 'none';
+                            }}
+                        >
+                            Daftar Sekarang
+                        </span>
+                    </p>
+                </div>
+                <style>{`
+                    @keyframes slideUp {
+                        from {
+                            opacity: 0;
+                            transform: translateY(30px);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                    }
+                    @keyframes shake {
+                        0%, 100% { transform: translateX(0); }
+                        25% { transform: translateX(-5px); }
+                        75% { transform: translateX(5px); }
+                    }
+                `}</style>
             </div>
-            <style>{`
-                @keyframes slideUp {
-                    from {
-                        opacity: 0;
-                        transform: translateY(30px);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
-                }
-                @keyframes shake {
-                    0%, 100% { transform: translateX(0); }
-                    25% { transform: translateX(-5px); }
-                    75% { transform: translateX(5px); }
-                }
-            `}</style>
-        </div>
+        </>
     );
 };
 

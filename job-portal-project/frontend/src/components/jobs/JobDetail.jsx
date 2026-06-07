@@ -4,9 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ThemeContext } from '../../context/ThemeContext';
 import api from '../../services/api';
 import ApplyJobForm from '../../features/lamaran/ApplyJobForm';
-import FavoriteHandler from '../../features/lamaran/FavoriteHandler';
 import FavoriteService from '../../features/lamaran/FavoriteService';
-
 
 const JobDetail = () => {
     const { id } = useParams();
@@ -15,9 +13,34 @@ const JobDetail = () => {
     const [job, setJob] = useState(null);
     const [loading, setLoading] = useState(true);
     const [showApplyForm, setShowApplyForm] = useState(false);
+    const [toast, setToast] = useState({ show: false, text: '', type: '' });
     
     const isDark = theme === 'dark';
     const isAuthenticated = !!localStorage.getItem('token');
+
+    useEffect(() => {
+        if (toast.show) {
+            const timer = setTimeout(() => {
+                setToast({ show: false, text: '', type: '' });
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [toast.show]);
+
+    const showToast = (text, type) => {
+        setToast({ show: true, text, type });
+    };
+
+    const handleApplySuccess = (message) => {
+        showToast(message || '✅ Lamaran berhasil dikirim!', 'success');
+        setTimeout(() => {
+            setShowApplyForm(false);
+        }, 2000);
+    };
+
+    const handleApplyError = (message) => {
+        showToast(message || '❌ Gagal mengirim lamaran', 'error');
+    };
 
     const getBadgeStyle = (type) => {
         const colors = {
@@ -37,8 +60,25 @@ const JobDetail = () => {
             .catch(err => {
                 console.error("Gagal memuat:", err);
                 setLoading(false);
+                showToast('Gagal memuat detail lowongan', 'error');
             });
     }, [id]);
+
+    const toastStyles = {
+        position: 'fixed',
+        bottom: '20px',
+        right: '20px',
+        zIndex: 9999,
+        padding: '14px 20px',
+        borderRadius: '12px',
+        fontSize: '14px',
+        fontWeight: '600',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+        animation: 'slideInRight 0.3s ease',
+        boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
+    };
 
     const styles = {
         container: { 
@@ -138,94 +178,127 @@ const JobDetail = () => {
     if (!job) return <div style={styles.center}>❌ Lowongan tidak ditemukan.</div>;
 
     return (
-        <div style={styles.container}>
-            <button 
-                onClick={() => navigate(-1)} 
-                style={styles.backButton}
-                onMouseEnter={(e) => {
-                    e.currentTarget.style.background = '#ea580c';
-                    e.currentTarget.style.color = '#fff';
-                    e.currentTarget.style.transform = 'translateX(-4px)';
-                }}
-                onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'transparent';
-                    e.currentTarget.style.color = '#ea580c';
-                    e.currentTarget.style.transform = 'translateX(0)';
-                }}
-            >
-                ← Kembali
-            </button>
+        <>
+            {/* Toast Notification */}
+            {toast.show && (
+                <div style={{
+                    ...toastStyles,
+                    background: toast.type === 'success' 
+                        ? (isDark ? '#065f46' : '#dcfce7')
+                        : (isDark ? '#991b1b' : '#fee2e2'),
+                    color: toast.type === 'success' 
+                        ? (isDark ? '#86efac' : '#166534')
+                        : (isDark ? '#fecaca' : '#991b1b')
+                }}>
+                    <span>{toast.type === 'success' ? '✅' : '❌'}</span>
+                    {toast.text}
+                </div>
+            )}
 
-            <div style={styles.card}>
-                <div style={styles.headerContainer}>
-                    <h1 style={styles.title}>{job.title}</h1>
-                    {isAuthenticated && (
-                        <div style={styles.favContainer}>
-                            <FavoriteService jobId={job.id} />
+            <div style={styles.container}>
+                <button 
+                    onClick={() => navigate(-1)} 
+                    style={styles.backButton}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.background = '#ea580c';
+                        e.currentTarget.style.color = '#fff';
+                        e.currentTarget.style.transform = 'translateX(-4px)';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'transparent';
+                        e.currentTarget.style.color = '#ea580c';
+                        e.currentTarget.style.transform = 'translateX(0)';
+                    }}
+                >
+                    ← Kembali
+                </button>
+
+                <div style={styles.card}>
+                    <div style={styles.headerContainer}>
+                        <h1 style={styles.title}>{job.title}</h1>
+                        {isAuthenticated && (
+                            <div style={styles.favContainer}>
+                                <FavoriteService jobId={job.id} />
+                            </div>
+                        )}
+                    </div>
+
+                    <div style={styles.metaContainer}>
+                        <span style={styles.badge}>📂 {job.kategori}</span>
+                        <span style={{ 
+                            ...getBadgeStyle(job.type), 
+                            padding: '6px 14px', 
+                            borderRadius: '20px', 
+                            fontWeight: 'bold',
+                            fontSize: '0.85rem'
+                        }}>
+                            {job.type || 'N/A'}
+                        </span>
+                    </div>
+
+                    <div style={styles.section}>
+                        <h3 style={styles.subTitle}>💰 Gaji</h3>
+                        <p style={{ color: isDark ? '#fef3c7' : '#1c1917', fontSize: '18px', fontWeight: '600' }}>
+                            {job.gaji}
+                        </p>
+                    </div>
+
+                    <div style={styles.section}>
+                        <h3 style={styles.subTitle}>📋 Deskripsi Pekerjaan</h3>
+                        <p style={styles.desc}>{job.deskripsi}</p>
+                    </div>
+
+                    <button 
+                        onClick={() => isAuthenticated ? setShowApplyForm(!showApplyForm) : navigate('/login')}
+                        style={styles.applyButton}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                            e.currentTarget.style.boxShadow = '0 8px 20px rgba(234, 88, 12, 0.4)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = 'none';
+                        }}
+                    >
+                        {isAuthenticated ? (showApplyForm ? '✖ Tutup Form' : '📝 Lamar Sekarang') : '🔒 Login untuk Melamar'}
+                    </button>
+
+                    {showApplyForm && (
+                        <div style={{ marginTop: '24px', animation: 'fadeIn 0.3s ease' }}>
+                            <ApplyJobForm 
+                                jobId={job.id} 
+                                onFormSuccess={() => setShowApplyForm(false)}
+                                onSuccess={handleApplySuccess}
+                                onError={handleApplyError}
+                            />
                         </div>
                     )}
                 </div>
 
-                <div style={styles.metaContainer}>
-                    <span style={styles.badge}>📂 {job.kategori}</span>
-                    <span style={{ 
-                        ...getBadgeStyle(job.type), 
-                        padding: '6px 14px', 
-                        borderRadius: '20px', 
-                        fontWeight: 'bold',
-                        fontSize: '0.85rem'
-                    }}>
-                        {job.type || 'N/A'}
-                    </span>
-                </div>
-
-                <div style={styles.section}>
-                    <h3 style={styles.subTitle}>💰 Gaji</h3>
-                    <p style={{ color: isDark ? '#fef3c7' : '#1c1917', fontSize: '18px', fontWeight: '600' }}>
-                        {job.gaji}
-                    </p>
-                </div>
-
-                <div style={styles.section}>
-                    <h3 style={styles.subTitle}>📋 Deskripsi Pekerjaan</h3>
-                    <p style={styles.desc}>{job.deskripsi}</p>
-                </div>
-
-                <button 
-                    onClick={() => isAuthenticated ? setShowApplyForm(!showApplyForm) : navigate('/login')}
-                    style={styles.applyButton}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = 'translateY(-2px)';
-                        e.currentTarget.style.boxShadow = '0 8px 20px rgba(234, 88, 12, 0.4)';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.boxShadow = 'none';
-                    }}
-                >
-                    {isAuthenticated ? (showApplyForm ? '✖ Tutup Form' : '📝 Lamar Sekarang') : '🔒 Login untuk Melamar'}
-                </button>
-
-                {showApplyForm && (
-                    <div style={{ marginTop: '24px', animation: 'fadeIn 0.3s ease' }}>
-                        <ApplyJobForm jobId={job.id} onFormSuccess={() => setShowApplyForm(false)} />
-                    </div>
-                )}
+                <style>{`
+                    @keyframes fadeIn {
+                        from {
+                            opacity: 0;
+                            transform: translateY(-10px);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                    }
+                    @keyframes slideInRight {
+                        from {
+                            transform: translateX(100%);
+                            opacity: 0;
+                        }
+                        to {
+                            transform: translateX(0);
+                            opacity: 1;
+                        }
+                    }
+                `}</style>
             </div>
-
-            <style>{`
-                @keyframes fadeIn {
-                    from {
-                        opacity: 0;
-                        transform: translateY(-10px);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
-                }
-            `}</style>
-        </div>
+        </>
     );
 };
 

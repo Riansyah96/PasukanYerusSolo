@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ThemeContext } from '../../context/ThemeContext';
 import api from '../../services/api';
+import Modal from '../Modal/Modal';
 
 const Register = () => {
     const navigate = useNavigate();
@@ -16,13 +17,14 @@ const Register = () => {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [passwordStrength, setPasswordStrength] = useState(0);
+    const [showModal, setShowModal] = useState(false);
+    const [modalMessage, setModalMessage] = useState({ title: '', message: '', type: 'success' });
 
     const handleChange = (e) => {
         const value = e.target.value;
         setFormData({ ...formData, [e.target.name]: value });
         
         if (e.target.name === 'password') {
-            // Hitung kekuatan password
             let strength = 0;
             if (value.length >= 6) strength++;
             if (value.match(/[a-z]/) && value.match(/[A-Z]/)) strength++;
@@ -30,6 +32,12 @@ const Register = () => {
             if (value.match(/[^a-zA-Z0-9]/)) strength++;
             setPasswordStrength(strength);
         }
+    };
+
+    const showNotification = (title, message, type = 'success') => {
+        setModalMessage({ title, message, type });
+        setShowModal(true);
+        setTimeout(() => setShowModal(false), 3000);
     };
 
     const handleRegister = async (e) => {
@@ -45,11 +53,13 @@ const Register = () => {
 
         try {
             await api.post('/auth/register', payload);
-            alert('✨ Pendaftaran berhasil! Silakan masuk.');
-            navigate('/login');
+            showNotification('✨ Pendaftaran Berhasil', 'Akun Anda berhasil dibuat! Silakan masuk.', 'success');
+            setTimeout(() => {
+                navigate('/login');
+            }, 2000);
         } catch (err) {
-            console.error(err);
-            alert(err.response?.data?.message || 'Terjadi kesalahan saat pendaftaran.');
+            const errorMsg = err.response?.data?.message || 'Terjadi kesalahan saat pendaftaran.';
+            showNotification('❌ Pendaftaran Gagal', errorMsg, 'error');
         } finally {
             setLoading(false);
         }
@@ -238,147 +248,158 @@ const Register = () => {
     };
 
     return (
-        <div style={styles.container}>
-            <div style={styles.card}>
-                <div style={styles.brand}>
-                    <h1 style={styles.logo}>PasukanYerusSolo</h1>
-                    <div style={styles.subBrand}>Job Portal</div>
-                </div>
+        <>
+            {/* Modal Notification */}
+            <Modal
+                isOpen={showModal}
+                onClose={() => setShowModal(false)}
+                title={modalMessage.title}
+                message={modalMessage.message}
+                type={modalMessage.type}
+            />
 
-                <h2 style={styles.title}>
-                    <span style={{ color: '#ea580c' }}>📝</span> Buat Akun Baru
-                </h2>
-
-                <form onSubmit={handleRegister}>
-                    <label style={styles.label}>👤 Nama Lengkap</label>
-                    <div style={styles.inputWrapper}>
-                        <input 
-                            type="text" 
-                            name="nama_lengkap"
-                            placeholder="Masukkan nama lengkap Anda"
-                            value={formData.nama_lengkap}
-                            onChange={handleChange}
-                            style={styles.input}
-                            onFocus={handleInputFocus}
-                            onBlur={handleInputBlur}
-                            required
-                        />
+            <div style={styles.container}>
+                <div style={styles.card}>
+                    <div style={styles.brand}>
+                        <h1 style={styles.logo}>PasukanYerusSolo</h1>
+                        <div style={styles.subBrand}>Job Portal</div>
                     </div>
 
-                    <label style={styles.label}>📧 Alamat Email</label>
-                    <div style={styles.inputWrapper}>
-                        <input 
-                            type="email" 
-                            name="email"
-                            placeholder="nama@email.com"
-                            value={formData.email}
-                            onChange={handleChange}
-                            style={styles.input}
-                            onFocus={handleInputFocus}
-                            onBlur={handleInputBlur}
-                            required
-                        />
-                    </div>
+                    <h2 style={styles.title}>
+                        <span style={{ color: '#ea580c' }}>📝</span> Buat Akun Baru
+                    </h2>
 
-                    <label style={styles.label}>🔒 Kata Sandi</label>
-                    <div style={styles.inputWrapper}>
-                        <input 
-                            type={showPassword ? "text" : "password"} 
-                            name="password"
-                            placeholder="Buat kata sandi minimal 8 karakter"
-                            value={formData.password}
-                            onChange={handleChange}
-                            style={styles.input}
-                            onFocus={handleInputFocus}
-                            onBlur={handleInputBlur}
-                            required
-                        />
-                        <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            style={styles.passwordToggle}
-                        >
-                            {showPassword ? '👁️' : '🔒'}
-                        </button>
-                    </div>
-                    
-                    {formData.password && (
-                        <div style={styles.passwordStrength}>
-                            <span>Kekuatan: {getPasswordStrengthText()}</span>
-                            <div style={styles.strengthBar}>
-                                <div style={styles.strengthFill} />
-                            </div>
+                    <form onSubmit={handleRegister}>
+                        <label style={styles.label}>👤 Nama Lengkap</label>
+                        <div style={styles.inputWrapper}>
+                            <input 
+                                type="text" 
+                                name="nama_lengkap"
+                                placeholder="Masukkan nama lengkap Anda"
+                                value={formData.nama_lengkap}
+                                onChange={handleChange}
+                                style={styles.input}
+                                onFocus={handleInputFocus}
+                                onBlur={handleInputBlur}
+                                required
+                            />
                         </div>
-                    )}
 
-                    <label style={styles.label}>🏢 Daftar Sebagai (Tipe Akun)</label>
-                    <select 
-                        name="role" 
-                        value={formData.role} 
-                        onChange={handleChange} 
-                        style={styles.select}
-                        onFocus={handleInputFocus}
-                        onBlur={handleInputBlur}
-                    >
-                        <option value="Pelamar" style={{ background: isDark ? '#2e1505' : '#ffffff' }}>
-                            👨‍💼 Pelamar Kerja (Mencari Pekerjaan)
-                        </option>
-                        <option value="Perusahaan" style={{ background: isDark ? '#2e1505' : '#ffffff' }}>
-                            🏢 Perusahaan / HRD Partner
-                        </option>
-                    </select>
-                    <span style={styles.roleHint}>
-                        {formData.role === 'Pelamar' 
-                            ? '💡 Anda akan dapat mencari dan melamar pekerjaan' 
-                            : '💡 Anda akan dapat memposting lowongan pekerjaan'}
-                    </span>
+                        <label style={styles.label}>📧 Alamat Email</label>
+                        <div style={styles.inputWrapper}>
+                            <input 
+                                type="email" 
+                                name="email"
+                                placeholder="nama@email.com"
+                                value={formData.email}
+                                onChange={handleChange}
+                                style={styles.input}
+                                onFocus={handleInputFocus}
+                                onBlur={handleInputBlur}
+                                required
+                            />
+                        </div>
 
-                    <button 
-                        type="submit" 
-                        style={styles.btn} 
-                        disabled={loading}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'translateY(-2px)';
-                            e.currentTarget.style.boxShadow = '0 8px 20px rgba(234, 88, 12, 0.4)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'translateY(0)';
-                            e.currentTarget.style.boxShadow = 'none';
-                        }}
-                    >
-                        {loading ? '⏳ Mendaftarkan Akun...' : '✨ Daftar Sekarang'}
-                    </button>
-                </form>
+                        <label style={styles.label}>🔒 Kata Sandi</label>
+                        <div style={styles.inputWrapper}>
+                            <input 
+                                type={showPassword ? "text" : "password"} 
+                                name="password"
+                                placeholder="Buat kata sandi minimal 8 karakter"
+                                value={formData.password}
+                                onChange={handleChange}
+                                style={styles.input}
+                                onFocus={handleInputFocus}
+                                onBlur={handleInputBlur}
+                                required
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                style={styles.passwordToggle}
+                            >
+                                {showPassword ? '👁️' : '🔒'}
+                            </button>
+                        </div>
+                        
+                        {formData.password && (
+                            <div style={styles.passwordStrength}>
+                                <span>Kekuatan: {getPasswordStrengthText()}</span>
+                                <div style={styles.strengthBar}>
+                                    <div style={styles.strengthFill} />
+                                </div>
+                            </div>
+                        )}
 
-                <p style={styles.footerText}>
-                    Sudah punya akun? 
-                    <span 
-                        onClick={() => navigate('/login')} 
-                        style={styles.link}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.textDecoration = 'underline';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.textDecoration = 'none';
-                        }}
-                    >
-                        Masuk di sini
-                    </span>
-                </p>
+                        <label style={styles.label}>🏢 Daftar Sebagai (Tipe Akun)</label>
+                        <select 
+                            name="role" 
+                            value={formData.role} 
+                            onChange={handleChange} 
+                            style={styles.select}
+                            onFocus={handleInputFocus}
+                            onBlur={handleInputBlur}
+                        >
+                            <option value="Pelamar" style={{ background: isDark ? '#2e1505' : '#ffffff' }}>
+                                👨‍💼 Pelamar Kerja (Mencari Pekerjaan)
+                            </option>
+                            <option value="Perusahaan" style={{ background: isDark ? '#2e1505' : '#ffffff' }}>
+                                🏢 Perusahaan / HRD Partner
+                            </option>
+                        </select>
+                        <span style={styles.roleHint}>
+                            {formData.role === 'Pelamar' 
+                                ? '💡 Anda akan dapat mencari dan melamar pekerjaan' 
+                                : '💡 Anda akan dapat memposting lowongan pekerjaan'}
+                        </span>
+
+                        <button 
+                            type="submit" 
+                            style={styles.btn} 
+                            disabled={loading}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                e.currentTarget.style.boxShadow = '0 8px 20px rgba(234, 88, 12, 0.4)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = 'none';
+                            }}
+                        >
+                            {loading ? '⏳ Mendaftarkan Akun...' : '✨ Daftar Sekarang'}
+                        </button>
+                    </form>
+
+                    <p style={styles.footerText}>
+                        Sudah punya akun? 
+                        <span 
+                            onClick={() => navigate('/login')} 
+                            style={styles.link}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.textDecoration = 'underline';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.textDecoration = 'none';
+                            }}
+                        >
+                            Masuk di sini
+                        </span>
+                    </p>
+                </div>
+                <style>{`
+                    @keyframes slideUp {
+                        from {
+                            opacity: 0;
+                            transform: translateY(30px);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                    }
+                `}</style>
             </div>
-            <style>{`
-                @keyframes slideUp {
-                    from {
-                        opacity: 0;
-                        transform: translateY(30px);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
-                }
-            `}</style>
-        </div>
+        </>
     );
 };
 
