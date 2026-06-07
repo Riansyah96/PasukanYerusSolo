@@ -28,7 +28,7 @@ class AdminController {
   async getAllUsers(req, res) {
     try {
       const [rows] = await pool.query(
-        'SELECT id_user, nama, email, role, telepon, keahlian, tentang_saya, foto FROM users ORDER BY id_user DESC'
+        'SELECT id_user, nama, email, role, telepon, keahlian, tentang_saya, foto, created_at FROM users ORDER BY id_user DESC'
       );
       res.json(rows);
     } catch (err) {
@@ -42,7 +42,7 @@ class AdminController {
     try {
       const { id } = req.params;
       const [rows] = await pool.query(
-        'SELECT id_user, nama, email, role, telepon, keahlian, tentang_saya, foto FROM users WHERE id_user = ?',
+        'SELECT id_user, nama, email, role, telepon, keahlian, tentang_saya, foto, created_at FROM users WHERE id_user = ?',
         [id]
       );
       if (rows.length === 0) {
@@ -78,7 +78,6 @@ class AdminController {
     try {
       const { id } = req.params;
       
-      // Hapus data terkait terlebih dahulu
       await pool.query('DELETE FROM favorit WHERE id_user = ?', [id]);
       await pool.query('DELETE FROM lamaran WHERE id_user = ?', [id]);
       await pool.query('DELETE FROM lowongan WHERE id_perusahaan = ?', [id]);
@@ -95,7 +94,7 @@ class AdminController {
   async getAllJobs(req, res) {
     try {
       const [rows] = await pool.query(
-        `SELECT l.*, u.nama as nama_perusahaan 
+        `SELECT l.*, u.nama as nama_perusahaan, l.created_at
          FROM lowongan l 
          LEFT JOIN users u ON l.id_perusahaan = u.id_user 
          ORDER BY l.id_lowongan DESC`
@@ -107,12 +106,29 @@ class AdminController {
     }
   }
 
+  // UPDATE job
+  async updateJob(req, res) {
+    try {
+      const { id } = req.params;
+      const { judul_posisi, kategori, gaji } = req.body;
+      
+      await pool.query(
+        'UPDATE lowongan SET judul_posisi = ?, kategori = ?, gaji = ? WHERE id_lowongan = ?',
+        [judul_posisi, kategori, gaji, id]
+      );
+      
+      res.json({ message: 'Lowongan berhasil diperbarui' });
+    } catch (err) {
+      console.error('Update job error:', err);
+      res.status(500).json({ message: 'Gagal memperbarui lowongan' });
+    }
+  }
+
   // DELETE job
   async deleteJob(req, res) {
     try {
       const { id } = req.params;
       
-      // Hapus lamaran terkait terlebih dahulu
       await pool.query('DELETE FROM lamaran WHERE id_lowongan = ?', [id]);
       await pool.query('DELETE FROM favorit WHERE id_lowongan = ?', [id]);
       await pool.query('DELETE FROM lowongan WHERE id_lowongan = ?', [id]);
