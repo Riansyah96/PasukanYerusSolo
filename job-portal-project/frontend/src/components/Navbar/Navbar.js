@@ -69,8 +69,6 @@ const Navbar = ({ isAuthenticated, handleLogout, userRole }) => {
         textAlign: isMobile ? 'center' : 'left'
     });
 
-    // Rest of the component remains the same until the logout button...
-
     return (
         <>
             {/* Logout Confirmation Modal */}
@@ -237,7 +235,7 @@ const Navbar = ({ isAuthenticated, handleLogout, userRole }) => {
                         )}
                     </button>
                     
-                    {/* Role-based menu */}
+                    {/* Role-based menu - Perusahaan */}
                     {isAuthenticated && userRole === 'Perusahaan' && (
                         <>
                             <button 
@@ -255,7 +253,7 @@ const Navbar = ({ isAuthenticated, handleLogout, userRole }) => {
                                 onMouseEnter={() => setHoveredMenu('/hrd/dashboard')}
                                 onMouseLeave={() => setHoveredMenu(null)}
                             >
-                                Dashboard
+                                📊 Dashboard HRD
                             </button>
                             <button 
                                 onClick={() => navigateTo('/hrd/branding')}
@@ -272,10 +270,12 @@ const Navbar = ({ isAuthenticated, handleLogout, userRole }) => {
                                 onMouseEnter={() => setHoveredMenu('/hrd/branding')}
                                 onMouseLeave={() => setHoveredMenu(null)}
                             >
-                                Branding
+                                🎨 Branding
                             </button>
                         </>
                     )}
+                    
+                    {/* Role-based menu - Pelamar */}
                     {isAuthenticated && userRole === 'Pelamar' && (
                         <>
                             <button 
@@ -293,7 +293,7 @@ const Navbar = ({ isAuthenticated, handleLogout, userRole }) => {
                                 onMouseEnter={() => setHoveredMenu('/favorit')}
                                 onMouseLeave={() => setHoveredMenu(null)}
                             >
-                                Favorit
+                                ⭐ Favorit
                             </button>
                             <button 
                                 onClick={() => navigateTo('/status-lamaran')}
@@ -310,7 +310,7 @@ const Navbar = ({ isAuthenticated, handleLogout, userRole }) => {
                                 onMouseEnter={() => setHoveredMenu('/status-lamaran')}
                                 onMouseLeave={() => setHoveredMenu(null)}
                             >
-                                Status Lamaran
+                                📋 Status Lamaran
                             </button>
                             <button 
                                 onClick={() => navigateTo('/profile')}
@@ -327,9 +327,30 @@ const Navbar = ({ isAuthenticated, handleLogout, userRole }) => {
                                 onMouseEnter={() => setHoveredMenu('/profile')}
                                 onMouseLeave={() => setHoveredMenu(null)}
                             >
-                                Profil
+                                👤 Profil
                             </button>
                         </>
+                    )}
+                    
+                    {/* Role-based menu - Admin */}
+                    {isAuthenticated && userRole === 'Admin' && (
+                        <button 
+                            onClick={() => navigateTo('/admin/dashboard')}
+                            style={{
+                                background: 'none',
+                                border: 'none',
+                                color: hoveredMenu === '/admin/dashboard' ? '#ea580c' : (isDark ? '#fff' : '#1c1917'),
+                                fontWeight: '700',
+                                cursor: 'pointer',
+                                fontSize: '14px',
+                                transition: 'all 0.3s ease',
+                                padding: '8px 0'
+                            }}
+                            onMouseEnter={() => setHoveredMenu('/admin/dashboard')}
+                            onMouseLeave={() => setHoveredMenu(null)}
+                        >
+                            ⚙️ Admin Panel
+                        </button>
                     )}
                 </div>
 
@@ -546,10 +567,11 @@ const Navbar = ({ isAuthenticated, handleLogout, userRole }) => {
                             🔍 Lowongan
                         </button>
                         
+                        {/* Role-based menu - Perusahaan (Mobile) */}
                         {isAuthenticated && userRole === 'Perusahaan' && (
                             <>
                                 <button onClick={() => navigateTo('/hrd/dashboard')} style={{ padding: '14px 20px', borderRadius: '12px', color: isDark ? '#fff' : '#1c1917', background: 'none', border: 'none', fontSize: '18px', fontWeight: '700' }}>
-                                    📊 Dashboard
+                                    📊 Dashboard HRD
                                 </button>
                                 <button onClick={() => navigateTo('/hrd/branding')} style={{ padding: '14px 20px', borderRadius: '12px', color: isDark ? '#fff' : '#1c1917', background: 'none', border: 'none', fontSize: '18px', fontWeight: '700' }}>
                                     🎨 Branding
@@ -557,6 +579,7 @@ const Navbar = ({ isAuthenticated, handleLogout, userRole }) => {
                             </>
                         )}
                         
+                        {/* Role-based menu - Pelamar (Mobile) */}
                         {isAuthenticated && userRole === 'Pelamar' && (
                             <>
                                 <button onClick={() => navigateTo('/favorit')} style={{ padding: '14px 20px', borderRadius: '12px', color: isDark ? '#fff' : '#1c1917', background: 'none', border: 'none', fontSize: '18px', fontWeight: '700' }}>
@@ -569,6 +592,13 @@ const Navbar = ({ isAuthenticated, handleLogout, userRole }) => {
                                     👤 Profil
                                 </button>
                             </>
+                        )}
+                        
+                        {/* Role-based menu - Admin (Mobile) */}
+                        {isAuthenticated && userRole === 'Admin' && (
+                            <button onClick={() => navigateTo('/admin/dashboard')} style={{ padding: '14px 20px', borderRadius: '12px', color: isDark ? '#fff' : '#1c1917', background: 'none', border: 'none', fontSize: '18px', fontWeight: '700' }}>
+                                ⚙️ Admin Panel
+                            </button>
                         )}
                         
                         <div style={{

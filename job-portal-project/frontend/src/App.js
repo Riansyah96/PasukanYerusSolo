@@ -18,6 +18,7 @@ import FavoriteListContainer from './features/eksplorasi/FavoriteListContainer';
 import StatusTracker from './features/applications/StatusTracker';
 import ProfileContainer from './features/dashboard/ProfileContainer';
 import AdminStatsView from './features/dashboard/AdminStatsView';
+import AdminDashboard from './features/dashboard/AdminDashboard';
 
 const JobDetailWrapper = () => {
     const { id } = useParams();
@@ -207,7 +208,6 @@ const App = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
     const [userRole, setUserRole] = useState(localStorage.getItem('role'));
     
-    // Sync state dengan localStorage setiap ada perubahan
     useEffect(() => {
         const syncAuthState = () => {
             const token = localStorage.getItem('token');
@@ -235,7 +235,6 @@ const App = () => {
         setIsAuthenticated(!!token);
         setUserRole(role);
         
-        // Force re-render
         window.dispatchEvent(new Event('storage'));
     };
 
@@ -326,12 +325,12 @@ const App = () => {
                             <Route path="/job/:id" element={<JobDetailWrapper />} />
                             <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />} />
                             <Route path="/register" element={<Register />} />
-                            <Route path="/hrd/dashboard" element={<JobPublisher appTheme="dark" isMobile={window.innerWidth < 768} />} />
+                            <Route path="/hrd/dashboard" element={<JobPublisher isMobile={window.innerWidth < 768} />} />
                             <Route path="/hrd/branding" element={<CompanyBrandingForm />} />
                             <Route path="/favorit" element={<FavoriteListContainer />} />
-                            <Route path="/status-lamaran" element={<StatusTracker appTheme="dark" isMobile={window.innerWidth < 768} />} />
-                            <Route path="/profile" element={<ProfileContainer appTheme="dark" currentRole={userRole} />} />
-                            <Route path="/admin/dashboard" element={<AdminStatsView />} />
+                            <Route path="/status-lamaran" element={<StatusTracker isMobile={window.innerWidth < 768} />} />
+                            <Route path="/profile" element={<ProfileContainer currentRole={userRole} />} />
+                            <Route path="/admin/dashboard" element={<AdminDashboard />} />
                         </Routes>
                     </main>
                     <Footer />
