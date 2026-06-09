@@ -1,9 +1,11 @@
 import React, { useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ThemeContext } from '../../context/ThemeContext';
 
 const JobServices = () => {
     const { theme } = useContext(ThemeContext);
     const isDark = theme === 'dark';
+    const navigate = useNavigate();
     
     const colors = {
         cardBg: isDark ? '#120b06' : '#ffffff',
@@ -54,26 +56,28 @@ const JobServices = () => {
                 padding: '0 15px'
             }}>
                 {categories.map((cat, i) => (
-                    <div key={i} style={{ 
-                        padding: '28px', 
-                        background: colors.cardBg, 
-                        border: colors.border, 
-                        borderRadius: '20px',
-                        transition: 'all 0.3s ease',
-                        cursor: 'pointer',
-                        position: 'relative',
-                        overflow: 'hidden'
-                    }}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.borderColor = colors.accent;
-                        e.currentTarget.style.transform = 'translateY(-6px)';
-                        e.currentTarget.style.boxShadow = isDark ? '0 15px 30px rgba(0,0,0,0.3)' : '0 15px 30px rgba(0,0,0,0.1)';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor = isDark ? '#262626' : '#e5e5e5';
-                        e.currentTarget.style.transform = 'translateY(0px)';
-                        e.currentTarget.style.boxShadow = 'none';
-                    }}
+                    <div key={i} 
+                        onClick={() => navigate('/eksplorasi')}
+                        style={{ 
+                            padding: '28px', 
+                            background: colors.cardBg, 
+                            border: colors.border, 
+                            borderRadius: '20px',
+                            transition: 'all 0.3s ease',
+                            cursor: 'pointer',
+                            position: 'relative',
+                            overflow: 'hidden'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.borderColor = colors.accent;
+                            e.currentTarget.style.transform = 'translateY(-6px)';
+                            e.currentTarget.style.boxShadow = isDark ? '0 15px 30px rgba(0,0,0,0.3)' : '0 15px 30px rgba(0,0,0,0.1)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.borderColor = isDark ? '#262626' : '#e5e5e5';
+                            e.currentTarget.style.transform = 'translateY(0px)';
+                            e.currentTarget.style.boxShadow = 'none';
+                        }}
                     >
                         <div style={{
                             width: '50px',
@@ -90,7 +94,13 @@ const JobServices = () => {
                         </div>
                         <h3 style={{ color: colors.textMain, fontSize: 'clamp(18px, 4vw, 20px)', marginBottom: '12px', fontWeight: '800' }}>{cat.title}</h3>
                         <p style={{ color: colors.textMuted, fontSize: 'clamp(13px, 3.5vw, 14px)', lineHeight: '1.6', marginBottom: '16px' }}>{cat.desc}</p>
-                        <span style={{ color: colors.accent, fontSize: '13px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span 
+                            onClick={(e) => {
+                                e.stopPropagation(); // Mencegah event bubbling ke div card (opsional)
+                                navigate('/eksplorasi');
+                            }}
+                            style={{ color: colors.accent, fontSize: '13px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px' }}
+                        >
                             Lihat Lowongan <span style={{ transition: 'transform 0.2s' }}>→</span>
                         </span>
                     </div>

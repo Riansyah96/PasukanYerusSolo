@@ -1,40 +1,57 @@
 import React, { useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ThemeContext } from '../../context/ThemeContext';
 
 const Hero = () => {
     const { theme } = useContext(ThemeContext);
     const isDark = theme === 'dark';
-    
-    const colors = { 
-        textMain: isDark ? '#fef3c7' : '#1c1917', 
-        accent: '#ea580c', 
-        textMuted: isDark ? '#a3a3a3' : '#57534e',
-        bg: isDark ? '#080402' : '#f5f5f4'
-    };
-    
+    const navigate = useNavigate();
+
+    // Ganti URL gambar sesuai kebutuhan
+    const backgroundImageUrl = 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80';
+    // Alternatif lain:
+    // const backgroundImageUrl = '/images/hero-bg.jpg'; // jika menyimpan di public/images
+
     return (
         <section style={{ 
+            position: 'relative',
             padding: '60px 20px', 
             textAlign: 'center', 
-            background: colors.bg, 
-            color: colors.textMain, 
-            position: 'relative', 
-            overflow: 'hidden',
+            color: '#fff',
             minHeight: '100vh',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            transition: 'all 0.3s ease'
+            transition: 'all 0.3s ease',
+            backgroundImage: `url(${backgroundImageUrl})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundAttachment: 'fixed' // efek parallax sederhana
         }}>
+            {/* Overlay gelap/terang sesuai tema */}
+            <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: isDark 
+                    ? 'linear-gradient(135deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.7) 100%)'
+                    : 'linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.4) 100%)',
+                zIndex: 1
+            }} />
+
+            {/* Elemen dekoratif (lingkaran blur) tetap dipertahankan */}
             <div style={{
                 position: 'absolute',
                 top: '20%',
                 left: '10%',
                 width: '200px',
                 height: '200px',
-                background: 'radial-gradient(circle, rgba(234,88,12,0.08) 0%, transparent 70%)',
+                background: 'radial-gradient(circle, rgba(234,88,12,0.15) 0%, transparent 70%)',
                 borderRadius: '50%',
                 animation: 'float 6s ease-in-out infinite',
+                zIndex: 2
             }} />
             <div style={{
                 position: 'absolute',
@@ -42,24 +59,28 @@ const Hero = () => {
                 right: '5%',
                 width: '180px',
                 height: '180px',
-                background: 'radial-gradient(circle, rgba(245,158,11,0.06) 0%, transparent 70%)',
+                background: 'radial-gradient(circle, rgba(245,158,11,0.12) 0%, transparent 70%)',
                 borderRadius: '50%',
                 animation: 'float 8s ease-in-out infinite reverse',
+                zIndex: 2
             }} />
+
+            {/* Konten utama */}
             <div style={{ 
                 maxWidth: '900px', 
                 margin: '0 auto', 
                 position: 'relative', 
-                zIndex: 1,
+                zIndex: 3,
                 width: '100%'
             }}>
                 <span style={{ 
-                    color: colors.accent, 
+                    color: '#ea580c', 
                     fontWeight: '800', 
                     letterSpacing: '2px', 
                     fontSize: 'clamp(10px, 3vw, 13px)', 
                     textTransform: 'uppercase', 
-                    background: isDark ? 'rgba(234,88,12,0.1)' : 'rgba(234,88,12,0.15)', 
+                    background: 'rgba(0,0,0,0.4)', 
+                    backdropFilter: 'blur(4px)',
                     padding: '6px 14px', 
                     borderRadius: '30px', 
                     display: 'inline-block', 
@@ -74,23 +95,26 @@ const Hero = () => {
                     lineHeight: '1.2', 
                     fontWeight: '900', 
                     letterSpacing: '-0.02em',
-                    wordBreak: 'break-word'
+                    wordBreak: 'break-word',
+                    textShadow: '0 2px 10px rgba(0,0,0,0.3)'
                 }}>
-                    Wujudkan <br/> <span style={{ color: colors.accent }}>Potensi Terbesarmu</span>
+                    Wujudkan <br/> <span style={{ color: '#ea580c' }}>Potensi Terbesarmu</span>
                 </h1>
                 <p style={{ 
-                    color: colors.textMuted, 
+                    color: '#f0f0f0', 
                     fontSize: 'clamp(14px, 4vw, 18px)', 
                     marginBottom: '35px', 
                     lineHeight: '1.6', 
                     maxWidth: '600px', 
                     margin: '0 auto 35px auto',
-                    padding: '0 15px'
+                    padding: '0 15px',
+                    textShadow: '0 1px 4px rgba(0,0,0,0.2)'
                 }}>
                     Temukan ribuan lowongan dari perusahaan terpercaya, 
-                    mulai karirmu hari ini bersama <strong style={{ color: colors.accent }}>PasukanYerusSolo</strong>
+                    mulai karirmu hari ini bersama <strong style={{ color: '#ea580c' }}>PasukanYerusSolo</strong>
                 </p>
                 <button 
+                    onClick={() => navigate('/eksplorasi')}
                     style={{ 
                         padding: 'clamp(12px, 4vw, 16px) clamp(24px, 8vw, 48px)', 
                         background: 'linear-gradient(135deg, #ea580c 0%, #f59e0b 100%)', 
@@ -100,7 +124,7 @@ const Hero = () => {
                         fontWeight: '800', 
                         cursor: 'pointer', 
                         transition: 'all 0.3s ease', 
-                        boxShadow: '0 4px 20px rgba(234, 88, 12, 0.3)', 
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.3)', 
                         fontSize: 'clamp(14px, 4vw, 16px)',
                         width: 'auto',
                         minWidth: '200px'
@@ -123,18 +147,17 @@ const Hero = () => {
                     Mulai Eksplorasi →
                 </button>
             </div>
+
             <style>{`
                 @keyframes float {
                     0%, 100% { transform: translateY(0px) translateX(0px); }
                     50% { transform: translateY(-20px) translateX(10px); }
                 }
-                
                 @media (max-width: 768px) {
                     .hero-section {
                         padding: 40px 16px;
                     }
                 }
-                
                 @media (max-width: 480px) {
                     @keyframes float {
                         0%, 100% { transform: translateY(0px) translateX(0px); }
@@ -145,4 +168,5 @@ const Hero = () => {
         </section>
     );
 };
+
 export default Hero;

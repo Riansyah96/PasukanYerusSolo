@@ -253,7 +253,7 @@ const Navbar = ({ isAuthenticated, handleLogout, userRole }) => {
                                 onMouseEnter={() => setHoveredMenu('/hrd/dashboard')}
                                 onMouseLeave={() => setHoveredMenu(null)}
                             >
-                                📊 Dashboard HRD
+                                 Dashboard HRD
                             </button>
                             <button 
                                 onClick={() => navigateTo('/hrd/branding')}
@@ -270,7 +270,7 @@ const Navbar = ({ isAuthenticated, handleLogout, userRole }) => {
                                 onMouseEnter={() => setHoveredMenu('/hrd/branding')}
                                 onMouseLeave={() => setHoveredMenu(null)}
                             >
-                                🎨 Branding
+                                 Branding
                             </button>
                         </>
                     )}
@@ -293,7 +293,7 @@ const Navbar = ({ isAuthenticated, handleLogout, userRole }) => {
                                 onMouseEnter={() => setHoveredMenu('/favorit')}
                                 onMouseLeave={() => setHoveredMenu(null)}
                             >
-                                ⭐ Favorit
+                                 Favorit
                             </button>
                             <button 
                                 onClick={() => navigateTo('/status-lamaran')}
@@ -310,7 +310,7 @@ const Navbar = ({ isAuthenticated, handleLogout, userRole }) => {
                                 onMouseEnter={() => setHoveredMenu('/status-lamaran')}
                                 onMouseLeave={() => setHoveredMenu(null)}
                             >
-                                📋 Status Lamaran
+                                 Status Lamaran
                             </button>
                             <button 
                                 onClick={() => navigateTo('/profile')}
@@ -327,7 +327,7 @@ const Navbar = ({ isAuthenticated, handleLogout, userRole }) => {
                                 onMouseEnter={() => setHoveredMenu('/profile')}
                                 onMouseLeave={() => setHoveredMenu(null)}
                             >
-                                👤 Profil
+                                 Profil
                             </button>
                         </>
                     )}
@@ -349,7 +349,7 @@ const Navbar = ({ isAuthenticated, handleLogout, userRole }) => {
                             onMouseEnter={() => setHoveredMenu('/admin/dashboard')}
                             onMouseLeave={() => setHoveredMenu(null)}
                         >
-                            ⚙️ Admin Panel
+                             Admin Panel
                         </button>
                     )}
                 </div>
@@ -554,7 +554,7 @@ const Navbar = ({ isAuthenticated, handleLogout, userRole }) => {
                                 borderRadius: '12px'
                             }}
                         >
-                            🏠 Beranda
+                             Beranda
                         </button>
                         <button 
                             onClick={() => navigateTo('/eksplorasi')} 
@@ -564,17 +564,17 @@ const Navbar = ({ isAuthenticated, handleLogout, userRole }) => {
                                 borderRadius: '12px'
                             }}
                         >
-                            🔍 Lowongan
+                             Lowongan
                         </button>
                         
                         {/* Role-based menu - Perusahaan (Mobile) */}
                         {isAuthenticated && userRole === 'Perusahaan' && (
                             <>
                                 <button onClick={() => navigateTo('/hrd/dashboard')} style={{ padding: '14px 20px', borderRadius: '12px', color: isDark ? '#fff' : '#1c1917', background: 'none', border: 'none', fontSize: '18px', fontWeight: '700' }}>
-                                    📊 Dashboard HRD
+                                     Dashboard HRD
                                 </button>
                                 <button onClick={() => navigateTo('/hrd/branding')} style={{ padding: '14px 20px', borderRadius: '12px', color: isDark ? '#fff' : '#1c1917', background: 'none', border: 'none', fontSize: '18px', fontWeight: '700' }}>
-                                    🎨 Branding
+                                     Branding
                                 </button>
                             </>
                         )}
@@ -583,13 +583,13 @@ const Navbar = ({ isAuthenticated, handleLogout, userRole }) => {
                         {isAuthenticated && userRole === 'Pelamar' && (
                             <>
                                 <button onClick={() => navigateTo('/favorit')} style={{ padding: '14px 20px', borderRadius: '12px', color: isDark ? '#fff' : '#1c1917', background: 'none', border: 'none', fontSize: '18px', fontWeight: '700' }}>
-                                    ⭐ Favorit
+                                     Favorit
                                 </button>
                                 <button onClick={() => navigateTo('/status-lamaran')} style={{ padding: '14px 20px', borderRadius: '12px', color: isDark ? '#fff' : '#1c1917', background: 'none', border: 'none', fontSize: '18px', fontWeight: '700' }}>
-                                    📋 Status Lamaran
+                                     Status Lamaran
                                 </button>
                                 <button onClick={() => navigateTo('/profile')} style={{ padding: '14px 20px', borderRadius: '12px', color: isDark ? '#fff' : '#1c1917', background: 'none', border: 'none', fontSize: '18px', fontWeight: '700' }}>
-                                    👤 Profil
+                                     Profil
                                 </button>
                             </>
                         )}
