@@ -2,8 +2,6 @@
 import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ThemeContext } from '../../context/ThemeContext';
-import styles from './JobCard.module.css';
-
 const JobCard = ({ job, isFull }) => {
     const navigate = useNavigate();
     const { theme } = useContext(ThemeContext);
@@ -94,7 +92,6 @@ const JobCard = ({ job, isFull }) => {
 
     return (
         <div 
-            className={styles.card} 
             onClick={() => navigate(`/job/${job.id}`)} 
             style={cardStyles}
             onMouseEnter={(e) => {
@@ -119,7 +116,6 @@ const JobCard = ({ job, isFull }) => {
                 <div style={detailSectionStyles}>
                     <p style={descStyles}>{job.deskripsi || "Deskripsi tidak tersedia."}</p>
                     <button 
-                        className={styles.applyBtn}
                         style={applyBtnStyles}
                         onMouseEnter={(e) => {
                             e.currentTarget.style.transform = 'translateY(-2px)';

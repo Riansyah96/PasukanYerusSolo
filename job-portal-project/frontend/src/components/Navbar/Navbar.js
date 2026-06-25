@@ -7,10 +7,7 @@ const Navbar = ({ isAuthenticated, handleLogout, userRole }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const { theme, toggleTheme } = useContext(ThemeContext);
-    const [hoveredMenu, setHoveredMenu] = useState(null);
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const [scrolled, setScrolled] = useState(false);
-    const [logoHovered, setLogoHovered] = useState(false);
+    const [activeMenu, setActiveMenu] = useState('/');
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -18,27 +15,21 @@ const Navbar = ({ isAuthenticated, handleLogout, userRole }) => {
     const isDark = theme === 'dark';
 
     useEffect(() => {
-        const handleScroll = () => {
-            setScrolled(window.scrollY > 50);
-        };
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
+        setActiveMenu(location.pathname);
+    }, [location.pathname]);
 
     useEffect(() => {
         const handleResize = () => {
             setIsMobile(window.innerWidth < 768);
-            if (window.innerWidth >= 768) {
-                setMobileMenuOpen(false);
-            }
         };
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
     const navigateTo = (path) => {
+        window.scrollTo({ top: 0, behavior: 'instant' });
         navigate(path);
-        setMobileMenuOpen(false);
+        setActiveMenu(path);
     };
 
     const handleLogoutClick = () => {
@@ -54,24 +45,35 @@ const Navbar = ({ isAuthenticated, handleLogout, userRole }) => {
         }, 2000);
     };
 
-    const getMenuStyle = (menuPath) => ({
-        background: 'none', 
-        border: 'none',
-        color: hoveredMenu === menuPath || location.pathname === menuPath ? '#ea580c' : (isDark ? '#fff' : '#1c1917'),
-        fontWeight: '700', 
-        cursor: 'pointer', 
-        fontSize: isMobile ? '18px' : '14px', 
-        transition: 'all 0.3s ease',
-        padding: '12px 0',
-        position: 'relative',
-        letterSpacing: '0.3px',
-        width: isMobile ? '100%' : 'auto',
-        textAlign: isMobile ? 'center' : 'left'
-    });
+    const menuItems = [
+        { path: '/', label: 'Beranda', icon: '🏠' },
+        { path: '/eksplorasi', label: 'Lowongan', icon: '💼' },
+    ];
+
+    const getRoleBasedPath = () => {
+        if (!isAuthenticated) return '/login';
+        if (userRole === 'Perusahaan') return '/hrd/dashboard';
+        if (userRole === 'Pelamar') return '/profile';
+        if (userRole === 'Admin') return '/admin/dashboard';
+        return '/login';
+    };
+
+    const getRoleBasedIcon = () => {
+        if (!isAuthenticated) return '🔑';
+        if (userRole === 'Perusahaan') return '📋';
+        if (userRole === 'Pelamar') return '👤';
+        if (userRole === 'Admin') return '⚙️';
+        return '🔑';
+    };
+
+    const getMenuItemColor = (path) => {
+        const isActive = activeMenu === path;
+        if (isActive) return '#ea580c';
+        return isDark ? '#ffffff' : '#1c1917';
+    };
 
     return (
         <>
-            {/* Logout Confirmation Modal */}
             <Modal
                 isOpen={showLogoutModal}
                 onClose={() => setShowLogoutModal(false)}
@@ -81,7 +83,6 @@ const Navbar = ({ isAuthenticated, handleLogout, userRole }) => {
                 onConfirm={confirmLogout}
             />
 
-            {/* Success Logout Modal */}
             <Modal
                 isOpen={showSuccessModal}
                 onClose={() => setShowSuccessModal(false)}
@@ -90,350 +91,358 @@ const Navbar = ({ isAuthenticated, handleLogout, userRole }) => {
                 type="success"
             />
 
-            <nav style={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center', 
-                padding: scrolled ? '12px 4%' : '16px 4%', 
-                background: scrolled 
-                    ? (isDark ? 'rgba(12, 10, 9, 0.95)' : 'rgba(245, 245, 244, 0.95)')
-                    : (isDark ? '#0c0a09' : '#f5f5f4'), 
-                borderBottom: `1px solid ${isDark ? '#262626' : '#e5e5e5'}`,
-                position: 'sticky',
-                top: 0,
+            <div style={{
+                position: 'fixed',
+                bottom: isMobile ? '16px' : 'auto',
+                top: isMobile ? 'auto' : '16px',
+                left: 0,
+                right: 0,
+                display: 'flex',
+                justifyContent: 'center',
                 zIndex: 1000,
-                transition: 'all 0.3s ease',
-                backdropFilter: scrolled ? 'blur(10px)' : 'none'
+                pointerEvents: 'none'
             }}>
-                {/* Logo Section */}
-                <div 
-                    onClick={() => navigateTo('/')} 
-                    style={{ 
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: isMobile ? '6px' : '8px'
-                    }}
-                    onMouseEnter={(e) => {
-                        if (!isMobile) {
-                            setLogoHovered(true);
-                            e.currentTarget.style.transform = 'scale(1.02)';
-                        }
-                    }}
-                    onMouseLeave={(e) => {
-                        if (!isMobile) {
-                            setLogoHovered(false);
-                            e.currentTarget.style.transform = 'scale(1)';
-                        }
-                    }}
-                >
-                    <div style={{
-                        width: isMobile ? '32px' : '36px',
-                        height: isMobile ? '32px' : '36px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        background: `linear-gradient(135deg, #ea580c, #f59e0b)`,
-                        borderRadius: '10px',
-                        transform: !isMobile && logoHovered ? 'rotate(5deg) scale(1.05)' : 'rotate(0deg) scale(1)',
-                        transition: 'all 0.3s ease',
-                        boxShadow: !isMobile && logoHovered ? '0 4px 15px rgba(234, 88, 12, 0.4)' : 'none'
-                    }}>
-                        <span style={{
-                            fontSize: isMobile ? '16px' : '18px',
-                            fontWeight: '900',
-                            color: '#fff'
-                        }}>
-                            ⚡
-                        </span>
-                    </div>
-                    
-                    <div>
-                        <h2 style={{ 
-                            color: isDark ? '#fef3c7' : '#1c1917', 
-                            margin: 0, 
-                            fontSize: isMobile ? '18px' : '22px',
-                            fontWeight: '800',
-                            letterSpacing: '-0.5px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '2px',
-                            flexWrap: 'wrap'
-                        }}>
-                            <span style={{ 
-                                background: 'linear-gradient(135deg, #ea580c, #f59e0b)',
-                                backgroundClip: 'text',
-                                WebkitBackgroundClip: 'text',
-                                color: 'transparent'
-                            }}>
-                                Pasukan
-                            </span>
-                            <span style={{ color: '#ea580c' }}>Yerus</span>
-                            <span style={{ color: isDark ? '#fef3c7' : '#1c1917' }}>Solo</span>
-                        </h2>
-                        {!isMobile && (
-                            <div style={{
-                                fontSize: '8px',
-                                letterSpacing: '1px',
-                                color: '#ea580c',
-                                textTransform: 'uppercase',
-                                fontWeight: '700',
-                                marginTop: '2px',
-                                opacity: logoHovered ? 1 : 0.7,
-                                transition: 'opacity 0.3s ease'
-                            }}>
-                                #1 Portal Karir
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* Desktop Menu */}
-                <div className="nav-menu" style={{ 
-                    display: isMobile ? 'none' : 'flex', 
-                    gap: '30px', 
+                <div style={{ pointerEvents: 'auto' }}>
+                <nav style={{
+                    display: 'flex',
                     alignItems: 'center',
-                    flexWrap: 'wrap'
+                    gap: isMobile ? '4px' : '6px',
+                    background: isDark ? 'rgba(12, 10, 9, 0.85)' : 'rgba(245, 245, 244, 0.85)',
+                    backdropFilter: 'blur(16px)',
+                    WebkitBackdropFilter: 'blur(16px)',
+                    border: `1px solid ${isDark ? 'rgba(38,38,38,0.5)' : 'rgba(229,229,229,0.5)'}`,
+                    borderRadius: '60px',
+                    overflow: 'hidden',
+                    padding: isMobile ? '6px 8px' : '8px 12px',
+                    boxShadow: isDark
+                        ? '0 8px 32px rgba(0,0,0,0.4)'
+                        : '0 8px 32px rgba(0,0,0,0.1)',
                 }}>
-                    <button 
-                        style={getMenuStyle('/')} 
-                        onClick={() => navigateTo('/')} 
-                        onMouseEnter={() => setHoveredMenu('/')} 
-                        onMouseLeave={() => setHoveredMenu(null)}
-                    >
-                        Beranda
-                        {location.pathname === '/' && (
-                            <span style={{
-                                position: 'absolute',
-                                bottom: '0',
-                                left: '0',
-                                width: '100%',
-                                height: '2px',
-                                background: '#ea580c',
-                                borderRadius: '2px'
-                            }} />
-                        )}
-                    </button>
-                    <button 
-                        style={getMenuStyle('/eksplorasi')} 
-                        onClick={() => navigateTo('/eksplorasi')} 
-                        onMouseEnter={() => setHoveredMenu('/eksplorasi')} 
-                        onMouseLeave={() => setHoveredMenu(null)}
-                    >
-                        Lowongan
-                        {location.pathname === '/eksplorasi' && (
-                            <span style={{
-                                position: 'absolute',
-                                bottom: '0',
-                                left: '0',
-                                width: '100%',
-                                height: '2px',
-                                background: '#ea580c',
-                                borderRadius: '2px'
-                            }} />
-                        )}
-                    </button>
-                    
-                    {/* Role-based menu - Perusahaan */}
-                    {isAuthenticated && userRole === 'Perusahaan' && (
+                    {isMobile ? (
                         <>
-                            <button 
-                                onClick={() => navigateTo('/hrd/dashboard')}
+                            <button
+                                onClick={toggleTheme}
                                 style={{
                                     background: 'none',
                                     border: 'none',
-                                    color: hoveredMenu === '/hrd/dashboard' ? '#ea580c' : (isDark ? '#fff' : '#1c1917'),
-                                    fontWeight: '700',
                                     cursor: 'pointer',
-                                    fontSize: '14px',
+                                    width: '36px',
+                                    height: '36px',
+                                    borderRadius: '50%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '17px',
                                     transition: 'all 0.3s ease',
-                                    padding: '8px 0'
+                                    flexShrink: 0
                                 }}
-                                onMouseEnter={() => setHoveredMenu('/hrd/dashboard')}
-                                onMouseLeave={() => setHoveredMenu(null)}
-                            >
-                                 Dashboard HRD
-                            </button>
-                            <button 
-                                onClick={() => navigateTo('/hrd/branding')}
-                                style={{
-                                    background: 'none',
-                                    border: 'none',
-                                    color: hoveredMenu === '/hrd/branding' ? '#ea580c' : (isDark ? '#fff' : '#1c1917'),
-                                    fontWeight: '700',
-                                    cursor: 'pointer',
-                                    fontSize: '14px',
-                                    transition: 'all 0.3s ease',
-                                    padding: '8px 0'
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)';
                                 }}
-                                onMouseEnter={() => setHoveredMenu('/hrd/branding')}
-                                onMouseLeave={() => setHoveredMenu(null)}
-                            >
-                                 Branding
-                            </button>
-                        </>
-                    )}
-                    
-                    {/* Role-based menu - Pelamar */}
-                    {isAuthenticated && userRole === 'Pelamar' && (
-                        <>
-                            <button 
-                                onClick={() => navigateTo('/favorit')}
-                                style={{
-                                    background: 'none',
-                                    border: 'none',
-                                    color: hoveredMenu === '/favorit' ? '#ea580c' : (isDark ? '#fff' : '#1c1917'),
-                                    fontWeight: '700',
-                                    cursor: 'pointer',
-                                    fontSize: '14px',
-                                    transition: 'all 0.3s ease',
-                                    padding: '8px 0'
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = 'none';
                                 }}
-                                onMouseEnter={() => setHoveredMenu('/favorit')}
-                                onMouseLeave={() => setHoveredMenu(null)}
                             >
-                                 Favorit
+                                {isDark ? '☀️' : '🌙'}
                             </button>
-                            <button 
-                                onClick={() => navigateTo('/status-lamaran')}
-                                style={{
-                                    background: 'none',
-                                    border: 'none',
-                                    color: hoveredMenu === '/status-lamaran' ? '#ea580c' : (isDark ? '#fff' : '#1c1917'),
-                                    fontWeight: '700',
-                                    cursor: 'pointer',
-                                    fontSize: '14px',
-                                    transition: 'all 0.3s ease',
-                                    padding: '8px 0'
-                                }}
-                                onMouseEnter={() => setHoveredMenu('/status-lamaran')}
-                                onMouseLeave={() => setHoveredMenu(null)}
-                            >
-                                 Status Lamaran
-                            </button>
-                            <button 
-                                onClick={() => navigateTo('/profile')}
-                                style={{
-                                    background: 'none',
-                                    border: 'none',
-                                    color: hoveredMenu === '/profile' ? '#ea580c' : (isDark ? '#fff' : '#1c1917'),
-                                    fontWeight: '700',
-                                    cursor: 'pointer',
-                                    fontSize: '14px',
-                                    transition: 'all 0.3s ease',
-                                    padding: '8px 0'
-                                }}
-                                onMouseEnter={() => setHoveredMenu('/profile')}
-                                onMouseLeave={() => setHoveredMenu(null)}
-                            >
-                                 Profil
-                            </button>
-                        </>
-                    )}
-                    
-                    {/* Role-based menu - Admin */}
-                    {isAuthenticated && userRole === 'Admin' && (
-                        <button 
-                            onClick={() => navigateTo('/admin/dashboard')}
-                            style={{
-                                background: 'none',
-                                border: 'none',
-                                color: hoveredMenu === '/admin/dashboard' ? '#ea580c' : (isDark ? '#fff' : '#1c1917'),
-                                fontWeight: '700',
-                                cursor: 'pointer',
-                                fontSize: '14px',
-                                transition: 'all 0.3s ease',
-                                padding: '8px 0'
-                            }}
-                            onMouseEnter={() => setHoveredMenu('/admin/dashboard')}
-                            onMouseLeave={() => setHoveredMenu(null)}
-                        >
-                             Admin Panel
-                        </button>
-                    )}
-                </div>
 
-                {/* Right Section */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : '15px' }}>
-                    <button
-                        onClick={toggleTheme}
-                        style={{
-                            background: isDark ? '#1c1917' : '#e5e5e5',
-                            border: `1px solid ${isDark ? '#262626' : '#d4d4d4'}`,
-                            borderRadius: '50%',
-                            width: isMobile ? '36px' : '40px',
-                            height: isMobile ? '36px' : '40px',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            transition: 'all 0.3s ease',
-                            fontSize: isMobile ? '16px' : '18px'
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'scale(1.1)';
-                            e.currentTarget.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'scale(1)';
-                            e.currentTarget.style.boxShadow = 'none';
-                        }}
-                    >
-                        {isDark ? '☀️' : '🌙'}
-                    </button>
+                            {menuItems.map((item) => {
+                                const isActive = activeMenu === item.path;
+                                return (
+                                    <button
+                                        key={item.path}
+                                        onClick={() => navigateTo(item.path)}
+                                        style={{
+                                            position: 'relative',
+                                            background: 'none',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            padding: '8px 12px',
+                                            borderRadius: '40px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '4px',
+                                            fontWeight: '800',
+                                            fontSize: '12px',
+                                            color: isActive ? '#fff' : getMenuItemColor(item.path),
+                                            transition: 'all 0.3s ease',
+                                            whiteSpace: 'nowrap',
+                                            flexShrink: 0
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            if (!isActive) {
+                                                e.currentTarget.style.color = '#ea580c';
+                                            }
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            if (!isActive) {
+                                                e.currentTarget.style.color = getMenuItemColor(item.path);
+                                            }
+                                        }}
+                                    >
+                                        {isActive && (
+                                            <span style={{
+                                                position: 'absolute',
+                                                inset: 0,
+                                                borderRadius: '40px',
+                                                background: 'linear-gradient(135deg, #ea580c, #f59e0b)',
+                                                zIndex: 0
+                                            }} />
+                                        )}
+                                        <span style={{ position: 'relative', zIndex: 1, fontSize: '16px' }}>
+                                            {item.icon}
+                                        </span>
+                                    </button>
+                                );
+                            })}
 
-                    {!isMobile && (
-                        <>
                             {isAuthenticated ? (
-                                <button 
+                                <button
+                                    onClick={() => navigateTo(getRoleBasedPath())}
+                                    style={{
+                                        background: 'none',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        width: '36px',
+                                        height: '36px',
+                                        borderRadius: '50%',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontSize: '17px',
+                                        transition: 'all 0.3s ease',
+                                        flexShrink: 0
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.background = 'none';
+                                    }}
+                                >
+                                    {getRoleBasedIcon()}
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={() => navigateTo('/login')}
+                                    style={{
+                                        padding: '7px 14px',
+                                        borderRadius: '40px',
+                                        border: 'none',
+                                        background: 'linear-gradient(135deg, #ea580c, #f59e0b)',
+                                        color: '#fff',
+                                        fontWeight: '800',
+                                        fontSize: '12px',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.3s ease',
+                                        flexShrink: 0,
+                                        whiteSpace: 'nowrap'
+                                    }}
+                                >
+                                    Login
+                                </button>
+                            )}
+                        </>
+                    ) : (
+                        <>
+                            <div
+                                onClick={() => navigateTo('/')}
+                                style={{
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    padding: '4px 8px 4px 6px',
+                                    borderRadius: '40px',
+                                    transition: 'all 0.3s ease',
+                                    flexShrink: 0
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = 'transparent';
+                                }}
+                            >
+                                <div style={{
+                                    width: '30px',
+                                    height: '30px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    background: 'linear-gradient(135deg, #ea580c, #f59e0b)',
+                                    borderRadius: '50%',
+                                    flexShrink: 0
+                                }}>
+                                    <span style={{ fontSize: '13px', fontWeight: '900', color: '#fff' }}>
+                                        ⚡
+                                    </span>
+                                </div>
+                                <span style={{
+                                    fontSize: '12px',
+                                    fontWeight: '900',
+                                    letterSpacing: '-0.3px',
+                                    whiteSpace: 'nowrap',
+                                    marginLeft: '4px'
+                                }}>
+                                    <span style={{
+                                        background: 'linear-gradient(135deg, #ea580c, #f59e0b)',
+                                        backgroundClip: 'text',
+                                        WebkitBackgroundClip: 'text',
+                                        color: 'transparent'
+                                    }}>
+                                        Pasukan
+                                    </span>
+                                    <span style={{ color: '#ea580c' }}>Yerus</span>
+                                    <span style={{ color: isDark ? '#fef3c7' : '#1c1917' }}>Solo</span>
+                                </span>
+                            </div>
+
+                            <div style={{
+                                width: '1px',
+                                height: '22px',
+                                background: isDark ? 'rgba(38,38,38,0.5)' : 'rgba(229,229,229,0.5)',
+                                flexShrink: 0,
+                                margin: '0 1px'
+                            }} />
+
+                            {menuItems.map((item) => {
+                                const isActive = activeMenu === item.path;
+                                return (
+                                    <button
+                                        key={item.path}
+                                        onClick={() => navigateTo(item.path)}
+                                        style={{
+                                            position: 'relative',
+                                            background: 'none',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            padding: '6px 14px',
+                                            borderRadius: '40px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '4px',
+                                            fontWeight: '800',
+                                            fontSize: '13px',
+                                            color: isActive ? '#fff' : getMenuItemColor(item.path),
+                                            transition: 'all 0.3s ease',
+                                            whiteSpace: 'nowrap',
+                                            flexShrink: 0
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            if (!isActive) {
+                                                e.currentTarget.style.color = '#ea580c';
+                                            }
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            if (!isActive) {
+                                                e.currentTarget.style.color = getMenuItemColor(item.path);
+                                            }
+                                        }}
+                                    >
+                                        {isActive && (
+                                            <span style={{
+                                                position: 'absolute',
+                                                inset: 0,
+                                                borderRadius: '40px',
+                                                background: 'linear-gradient(135deg, #ea580c, #f59e0b)',
+                                                zIndex: 0
+                                            }} />
+                                        )}
+                                        <span style={{ position: 'relative', zIndex: 1, fontSize: '15px' }}>
+                                            {item.icon}
+                                        </span>
+                                        <span style={{ position: 'relative', zIndex: 1 }}>
+                                            {item.label}
+                                        </span>
+                                    </button>
+                                );
+                            })}
+
+                            <div style={{
+                                width: '1px',
+                                height: '22px',
+                                background: isDark ? 'rgba(38,38,38,0.5)' : 'rgba(229,229,229,0.5)',
+                                flexShrink: 0,
+                                margin: '0 1px'
+                            }} />
+
+                            <button
+                                onClick={toggleTheme}
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    width: '34px',
+                                    height: '34px',
+                                    borderRadius: '50%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '15px',
+                                    transition: 'all 0.3s ease',
+                                    flexShrink: 0
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = 'none';
+                                }}
+                            >
+                                {isDark ? '☀️' : '🌙'}
+                            </button>
+
+                            {isAuthenticated ? (
+                                <button
                                     onClick={handleLogoutClick}
-                                    style={{ 
-                                        padding: '8px 20px', 
-                                        borderRadius: '30px', 
-                                        border: '1px solid #ef4444', 
-                                        color: '#ef4444', 
-                                        cursor: 'pointer', 
-                                        background: 'transparent',
-                                        fontWeight: '600',
-                                        fontSize: '13px',
-                                        transition: 'all 0.3s ease'
+                                    style={{
+                                        background: 'none',
+                                        border: `1px solid ${isDark ? 'rgba(239,68,68,0.3)' : 'rgba(239,68,68,0.3)'}`,
+                                        cursor: 'pointer',
+                                        padding: '5px 12px',
+                                        borderRadius: '40px',
+                                        fontWeight: '700',
+                                        fontSize: '12px',
+                                        color: '#ef4444',
+                                        transition: 'all 0.3s ease',
+                                        flexShrink: 0,
+                                        whiteSpace: 'nowrap'
                                     }}
                                     onMouseEnter={(e) => {
                                         e.currentTarget.style.background = '#ef4444';
                                         e.currentTarget.style.color = '#fff';
-                                        e.currentTarget.style.transform = 'translateY(-2px)';
                                     }}
                                     onMouseLeave={(e) => {
                                         e.currentTarget.style.background = 'transparent';
                                         e.currentTarget.style.color = '#ef4444';
-                                        e.currentTarget.style.transform = 'translateY(0)';
                                     }}
                                 >
                                     Keluar
                                 </button>
                             ) : (
-                                <button 
-                                    onClick={() => navigateTo('/login')} 
-                                    style={{ 
-                                        padding: '8px 24px', 
-                                        borderRadius: '30px', 
-                                        border: '1px solid #ea580c', 
-                                        background: hoveredMenu === '/login' ? '#ea580c' : 'transparent', 
-                                        color: hoveredMenu === '/login' ? '#fff' : '#ea580c', 
-                                        fontWeight: '700', 
-                                        fontSize: '13px', 
-                                        cursor: 'pointer', 
+                                <button
+                                    onClick={() => navigateTo('/login')}
+                                    style={{
+                                        padding: '5px 14px',
+                                        borderRadius: '40px',
+                                        border: 'none',
+                                        background: 'linear-gradient(135deg, #ea580c, #f59e0b)',
+                                        color: '#fff',
+                                        fontWeight: '800',
+                                        fontSize: '12px',
+                                        cursor: 'pointer',
                                         transition: 'all 0.3s ease',
-                                        boxShadow: hoveredMenu === '/login' ? '0 4px 15px rgba(234,88,12,0.3)' : 'none'
+                                        flexShrink: 0,
+                                        whiteSpace: 'nowrap'
                                     }}
                                     onMouseEnter={(e) => {
-                                        setHoveredMenu('/login');
-                                        e.currentTarget.style.transform = 'translateY(-2px)';
+                                        e.currentTarget.style.transform = 'scale(1.05)';
+                                        e.currentTarget.style.boxShadow = '0 4px 15px rgba(234,88,12,0.3)';
                                     }}
                                     onMouseLeave={(e) => {
-                                        setHoveredMenu(null);
-                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.transform = 'scale(1)';
+                                        e.currentTarget.style.boxShadow = 'none';
                                     }}
                                 >
                                     Login
@@ -441,223 +450,9 @@ const Navbar = ({ isAuthenticated, handleLogout, userRole }) => {
                             )}
                         </>
                     )}
-                    
-                    <button 
-                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                        style={{
-                            display: isMobile ? 'block' : 'none',
-                            background: 'none',
-                            border: 'none',
-                            color: isDark ? '#fff' : '#1c1917',
-                            fontSize: '24px',
-                            cursor: 'pointer',
-                            padding: '8px',
-                            width: '40px',
-                            height: '40px',
-                            borderRadius: '8px',
-                            transition: 'all 0.3s ease'
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.background = isDark ? '#1c1917' : '#e5e5e5';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.background = 'transparent';
-                        }}
-                    >
-                        {mobileMenuOpen ? '✕' : '☰'}
-                    </button>
+                </nav>
                 </div>
-            </nav>
-
-            {/* Mobile Menu */}
-            {mobileMenuOpen && (
-                <div style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    background: isDark ? '#0c0a09' : '#f5f5f4',
-                    zIndex: 999,
-                    padding: '70px 20px 30px 20px',
-                    animation: 'slideIn 0.3s ease',
-                    overflowY: 'auto'
-                }}>
-                    <button 
-                        onClick={() => setMobileMenuOpen(false)}
-                        style={{
-                            position: 'absolute',
-                            top: '16px',
-                            right: '16px',
-                            background: isDark ? '#1c1917' : '#e5e5e5',
-                            border: 'none',
-                            color: isDark ? '#fff' : '#1c1917',
-                            fontSize: '20px',
-                            cursor: 'pointer',
-                            width: '40px',
-                            height: '40px',
-                            borderRadius: '10px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                        }}
-                    >
-                        ✕
-                    </button>
-                    
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '12px',
-                            marginBottom: '20px',
-                            paddingBottom: '20px',
-                            borderBottom: `1px solid ${isDark ? '#262626' : '#e5e5e5'}`
-                        }}>
-                            <div style={{
-                                width: '45px',
-                                height: '45px',
-                                background: `linear-gradient(135deg, #ea580c, #f59e0b)`,
-                                borderRadius: '12px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                            }}>
-                                <span style={{ fontSize: '22px', color: '#fff' }}>⚡</span>
-                            </div>
-                            <div>
-                                <h2 style={{ 
-                                    color: isDark ? '#fef3c7' : '#1c1917', 
-                                    margin: 0, 
-                                    fontSize: '20px',
-                                    fontWeight: '800'
-                                }}>
-                                    Pasukan<span style={{ color: '#ea580c' }}>Yerus</span>Solo
-                                </h2>
-                                <div style={{
-                                    fontSize: '10px',
-                                    color: '#ea580c',
-                                    textAlign: 'center',
-                                    marginTop: '4px'
-                                }}>
-                                    #1 Portal Karir
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <button 
-                            onClick={() => navigateTo('/')} 
-                            style={{
-                                ...getMenuStyle('/'),
-                                padding: '14px 20px',
-                                borderRadius: '12px'
-                            }}
-                        >
-                             Beranda
-                        </button>
-                        <button 
-                            onClick={() => navigateTo('/eksplorasi')} 
-                            style={{
-                                ...getMenuStyle('/eksplorasi'),
-                                padding: '14px 20px',
-                                borderRadius: '12px'
-                            }}
-                        >
-                             Lowongan
-                        </button>
-                        
-                        {/* Role-based menu - Perusahaan (Mobile) */}
-                        {isAuthenticated && userRole === 'Perusahaan' && (
-                            <>
-                                <button onClick={() => navigateTo('/hrd/dashboard')} style={{ padding: '14px 20px', borderRadius: '12px', color: isDark ? '#fff' : '#1c1917', background: 'none', border: 'none', fontSize: '18px', fontWeight: '700' }}>
-                                     Dashboard HRD
-                                </button>
-                                <button onClick={() => navigateTo('/hrd/branding')} style={{ padding: '14px 20px', borderRadius: '12px', color: isDark ? '#fff' : '#1c1917', background: 'none', border: 'none', fontSize: '18px', fontWeight: '700' }}>
-                                     Branding
-                                </button>
-                            </>
-                        )}
-                        
-                        {/* Role-based menu - Pelamar (Mobile) */}
-                        {isAuthenticated && userRole === 'Pelamar' && (
-                            <>
-                                <button onClick={() => navigateTo('/favorit')} style={{ padding: '14px 20px', borderRadius: '12px', color: isDark ? '#fff' : '#1c1917', background: 'none', border: 'none', fontSize: '18px', fontWeight: '700' }}>
-                                     Favorit
-                                </button>
-                                <button onClick={() => navigateTo('/status-lamaran')} style={{ padding: '14px 20px', borderRadius: '12px', color: isDark ? '#fff' : '#1c1917', background: 'none', border: 'none', fontSize: '18px', fontWeight: '700' }}>
-                                     Status Lamaran
-                                </button>
-                                <button onClick={() => navigateTo('/profile')} style={{ padding: '14px 20px', borderRadius: '12px', color: isDark ? '#fff' : '#1c1917', background: 'none', border: 'none', fontSize: '18px', fontWeight: '700' }}>
-                                     Profil
-                                </button>
-                            </>
-                        )}
-                        
-                        {/* Role-based menu - Admin (Mobile) */}
-                        {isAuthenticated && userRole === 'Admin' && (
-                            <button onClick={() => navigateTo('/admin/dashboard')} style={{ padding: '14px 20px', borderRadius: '12px', color: isDark ? '#fff' : '#1c1917', background: 'none', border: 'none', fontSize: '18px', fontWeight: '700' }}>
-                                ⚙️ Admin Panel
-                            </button>
-                        )}
-                        
-                        <div style={{
-                            marginTop: '20px',
-                            paddingTop: '20px',
-                            borderTop: `1px solid ${isDark ? '#262626' : '#e5e5e5'}`
-                        }}>
-                            {isAuthenticated ? (
-                                <button 
-                                    onClick={handleLogoutClick}
-                                    style={{ 
-                                        width: '100%',
-                                        padding: '14px 20px', 
-                                        borderRadius: '30px', 
-                                        border: '1px solid #ef4444', 
-                                        color: '#ef4444', 
-                                        cursor: 'pointer', 
-                                        background: 'transparent',
-                                        fontWeight: '600',
-                                        fontSize: '16px'
-                                    }}
-                                >
-                                    🚪 Keluar
-                                </button>
-                            ) : (
-                                <button 
-                                    onClick={() => navigateTo('/login')} 
-                                    style={{ 
-                                        width: '100%',
-                                        padding: '14px 20px', 
-                                        borderRadius: '30px', 
-                                        background: 'linear-gradient(135deg, #ea580c, #f59e0b)',
-                                        color: '#fff', 
-                                        fontWeight: '700', 
-                                        fontSize: '16px', 
-                                        cursor: 'pointer', 
-                                        border: 'none'
-                                    }}
-                                >
-                                    🔑 Login / Daftar
-                                </button>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            <style>{`
-                @keyframes slideIn {
-                    from { transform: translateX(100%); }
-                    to { transform: translateX(0); }
-                }
-                @media (max-width: 768px) {
-                    .nav-menu { display: none !important; }
-                }
-                @media (max-width: 480px) {
-                    nav { padding: 12px 3% !important; }
-                }
-            `}</style>
+            </div>
         </>
     );
 };

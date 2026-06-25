@@ -1,13 +1,17 @@
 import React from "react";
-import styles from "./index.module.css";
 
-/**
- * Component Container
- * Menggunakan Teknik Composition (props.children) sesuai instruksi dosen
- * Berfungsi membatasi lebar konten agar tidak terlalu melebar pada layar desktop
- */
 function Container({ children }) {
-  return <div className={styles.container}>{children}</div>;
+  return (
+    <div style={{
+      maxWidth: '1200px',
+      margin: '0 auto',
+      padding: '1rem',
+      width: '100%',
+      boxSizing: 'border-box'
+    }}>
+      {children}
+    </div>
+  );
 }
 
 export default Container;
