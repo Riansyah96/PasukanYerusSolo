@@ -1,4 +1,4 @@
-// controllers/applicationController.js
+
 const pool = require('../config/db');
 
 exports.applyJob = async (req, res, next) => {
@@ -45,7 +45,7 @@ exports.applyJob = async (req, res, next) => {
         
         res.status(201).json({ 
             status: "success", 
-            message: "✅ Lamaran berhasil dikirim!",
+            message: "Lamaran berhasil dikirim!",
             data: { id_lamaran: result.insertId }
         });
         
@@ -55,38 +55,19 @@ exports.applyJob = async (req, res, next) => {
     }
 };
 
-exports.addFavorite = async (req, res, next) => {
-    try {
-        const { id_lowongan } = req.body;
-        await pool.query("INSERT INTO favorit (id_user, id_lowongan) VALUES (?, ?)", [req.user.id_user, id_lowongan]);
-        res.json({ status: "success", message: "✨ Lowongan berhasil disimpan ke favorit!" });
-    } catch (err) { 
-        console.error('Add favorite error:', err);
-        next(err); 
-    }
-};
-
 exports.updateStatus = async (req, res, next) => {
     try {
         const { id } = req.params;
         const { status } = req.body;
-        
-        console.log('=== UPDATE STATUS ===');
-        console.log('ID Lamaran:', id);
-        console.log('Status baru:', status);
-        
-        // Validasi status - pastikan sesuai dengan enum di database
+
         const validStatus = ['Menunggu', 'Review', 'Interview', 'Lolos', 'Gagal'];
-        
-        // Cek apakah status yang dikirim valid
+
         if (!validStatus.includes(status)) {
-            console.log('Status tidak valid:', status);
             return res.status(400).json({ 
                 message: 'Status tidak valid. Gunakan: ' + validStatus.join(', ') 
             });
         }
-        
-        // Update status
+
         const [result] = await pool.query(
             'UPDATE lamaran SET status = ? WHERE id_lamaran = ?',
             [status, id]
@@ -96,7 +77,6 @@ exports.updateStatus = async (req, res, next) => {
             return res.status(404).json({ message: 'Lamaran tidak ditemukan' });
         }
         
-        console.log('Status updated successfully. Affected rows:', result.affectedRows);
         res.json({ 
             status: "success", 
             message: "Status lamaran diperbarui menjadi " + status 

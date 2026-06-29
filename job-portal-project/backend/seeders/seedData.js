@@ -5,13 +5,11 @@ async function runSeed() {
     try {
         console.log("Memulai seeding...");
 
-        // 1. Bersihkan tabel lama agar tidak terjadi konflik data (Duplicate Entry)
         await db.query('DELETE FROM favorit'); // Hapus relasi dulu agar tidak error constraint
         await db.query('DELETE FROM lowongan');
         await db.query('DELETE FROM users');
         console.log("Data lama berhasil dihapus.");
 
-        // 2. Seed Users
         const password = await bcrypt.hash('password123', 10);
         await db.query('INSERT INTO users (nama, email, password, role) VALUES (?, ?, ?, ?)', 
             ['Admin Utama', 'admin@portal.com', password, 'Admin']);
@@ -21,7 +19,6 @@ async function runSeed() {
             ['Budi Pelamar', 'budi@gmail.com', password, 'Pelamar']);
         console.log("Data users berhasil dimasukkan.");
 
-        // 3. Seed Jobs (Sesuaikan dengan nama kolom DESCRIBE lowongan)
         const jobs = [
             ['Fullstack Developer', 'IT', 'Full-time', 'Rp 10.000.000', 'Membangun arsitektur web modern.'],
             ['Frontend Engineer', 'IT', 'Remote', 'Rp 12.000.000', 'Fokus pada UI interaktif.'],
@@ -40,6 +37,32 @@ async function runSeed() {
             );
         }
         console.log("Data lowongan berhasil dimasukkan.");
+
+        await db.query('DROP TABLE IF EXISTS testimonials');
+        await db.query(
+            `CREATE TABLE testimonials (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                nama VARCHAR(255) NOT NULL,
+                role VARCHAR(255) DEFAULT '',
+                perusahaan VARCHAR(255) DEFAULT '',
+                teks TEXT NOT NULL,
+                rating INT DEFAULT 5,
+                status ENUM('pending','approved','rejected') DEFAULT 'pending',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )`
+        );
+        const testimonials = [
+            ['Budi Pelamar', 'Fullstack Developer', 'PT Teknologi Maju', 'Platform ini sangat membantu saya mendapatkan pekerjaan impian! Proses lamaran cepat dan mudah.', 5, 'approved'],
+            ['Siti Rahayu', 'UI/UX Designer', 'Creative Agency', 'Sangat merekomendasikan! Banyak lowongan berkualitas dan sesuai dengan keahlian saya.', 5, 'approved'],
+            ['Ahmad Fauzi', 'Backend Engineer', 'Startup Digital', 'Pengalaman melamar kerja jadi lebih efisien. Fitur notifikasinya sangat membantu.', 4, 'approved']
+        ];
+        for (const t of testimonials) {
+            await db.query(
+                'INSERT INTO testimonials (nama, role, perusahaan, teks, rating, status) VALUES (?, ?, ?, ?, ?, ?)',
+                t
+            );
+        }
+        console.log("Data testimonials berhasil dimasukkan.");
 
         console.log("Seeding selesai dengan sukses! ✅");
         process.exit();

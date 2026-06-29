@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ScrollReveal from '../../components/ScrollReveal';
 import { ThemeContext } from '../../context/ThemeContext';
+import { RocketLaunchIcon } from '@heroicons/react/24/outline';
 
 const CTA = () => {
   const navigate = useNavigate();
@@ -48,7 +49,7 @@ const CTA = () => {
             fontWeight: '800',
             letterSpacing: '-0.02em'
           }}>
-            🚀 <span style={{ color: c.accent }}>Siap Melangkah</span> Menuju Karir Impian?
+            <RocketLaunchIcon style={{ width: 28, height: 28, verticalAlign: "middle", marginTop: "-4px" }} /> <span style={{ color: c.accent }}>Siap Melangkah</span> Menuju Karir Impian?
           </h2>
           <p style={{
             color: c.textSecondary,

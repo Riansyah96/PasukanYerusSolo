@@ -1,4 +1,4 @@
-// routes/favoritRoutes.js
+
 const express = require('express');
 const router = express.Router();
 const favoritController = require('../controllers/favoritController');

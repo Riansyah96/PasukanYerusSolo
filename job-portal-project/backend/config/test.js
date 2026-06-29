@@ -1,2 +1,0 @@
-// anfasa ganteng 
-//ambatukam

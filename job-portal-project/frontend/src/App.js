@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate, useParams } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { ThemeProvider, ThemeContext } from './context/ThemeContext';
 import Navbar from './components/Navbar/Navbar';
 import Footer from './components/Footer/Footer';
 import PageTransition from './components/PageTransition';
 import Walkthrough from './features/landing/Walkthrough';
 import Hero from './features/landing/Hero';
+import { BoltIcon, RocketLaunchIcon, SparklesIcon, ChartBarIcon, MagnifyingGlassIcon, CursorArrowRaysIcon } from '@heroicons/react/24/outline';
+import InfoPage from './pages/InfoPage';
 
 import JobServices from './features/landing/JobServices';
 import Testimonials from './features/landing/Testimonials';
-import FAQ from './features/landing/FAQ';
 import CTA from './features/landing/CTA';
 import JobListContainer from './features/eksplorasi/JobListContainer';
 import Login from './components/auth/Login';
@@ -20,7 +21,6 @@ import CompanyBrandingForm from './features/dashboard/CompanyBrandingForm';
 import FavoriteListContainer from './features/eksplorasi/FavoriteListContainer';
 import StatusTracker from './features/applications/StatusTracker';
 import ProfileContainer from './features/dashboard/ProfileContainer';
-import AdminStatsView from './features/dashboard/AdminStatsView';
 import AdminDashboard from './features/dashboard/AdminDashboard';
 
 const JobDetailWrapper = () => {
@@ -78,7 +78,7 @@ const HomePage = () => {
                 padding: '4px 12px',
                 borderRadius: '20px'
               }}>
-                🔥 HOT OPPORTUNITIES
+                <BoltIcon style={{ width: 14, height: 14, verticalAlign: 'middle', marginTop: '-2px' }} /> HOT OPPORTUNITIES
               </span>
               <h2 style={{
                 fontSize: 'clamp(28px, 5vw, 42px)',
@@ -87,7 +87,7 @@ const HomePage = () => {
                 margin: 0,
                 lineHeight: '1.2'
               }}>
-                🚀 Lowongan <span style={{ color: '#ea580c' }}>Terkini</span> & <br /><span style={{ color: '#ea580c' }}>Paling Banyak</span> Dilirik
+                <RocketLaunchIcon style={{ width: 24, height: 24, verticalAlign: 'middle', marginTop: '-4px', color: '#ea580c' }} /> Lowongan <span style={{ color: '#ea580c' }}>Terkini</span> & <br /><span style={{ color: '#ea580c' }}>Paling Banyak</span> Dilirik
               </h2>
               <p style={{
                 color: colors.textSecondary,
@@ -96,7 +96,7 @@ const HomePage = () => {
                 maxWidth: '450px',
                 lineHeight: '1.5'
               }}>
-                🌟 <strong style={{ color: '#ea580c' }}>6.000+</strong> lowongan tersedia • <strong style={{ color: '#ea580c' }}>500+</strong> perusahaan terpercaya • Bergabung sekarang!
+                <SparklesIcon style={{ width: 16, height: 16, verticalAlign: 'middle', marginTop: '-3px', color: '#f59e0b' }} /> <strong style={{ color: '#ea580c' }}>6.000+</strong> lowongan tersedia • <strong style={{ color: '#ea580c' }}>500+</strong> perusahaan terpercaya • Bergabung sekarang!
               </p>
             </div>
             <button
@@ -162,7 +162,7 @@ const HomePage = () => {
               fontSize: '14px',
               margin: 0
             }}>
-              📊 <strong style={{ color: '#ea580c' }}>6 Lowongan Terbaru</strong> ditampilkan dari{' '}
+              <ChartBarIcon style={{ width: 16, height: 16, verticalAlign: 'middle', marginTop: '-3px', color: '#ea580c' }} /> <strong style={{ color: '#ea580c' }}>6 Lowongan Terbaru</strong> ditampilkan dari{' '}
               <strong style={{ color: '#ea580c' }}>100+ Lowongan</strong> lainnya
             </p>
             <div style={{
@@ -187,7 +187,6 @@ const HomePage = () => {
         </div>
       </section>
       <Testimonials />
-      <FAQ />
       <CTA />
     </>
   );
@@ -266,7 +265,7 @@ const App = () => {
               padding: '6px 16px',
               borderRadius: '30px'
             }}>
-              🔍 EKSPLORASI
+              <MagnifyingGlassIcon style={{ width: 14, height: 14, verticalAlign: 'middle', marginTop: '-2px' }} /> EKSPLORASI
             </span>
             <h1 style={{
               fontSize: 'clamp(32px, 6vw, 48px)',
@@ -292,7 +291,7 @@ const App = () => {
               margin: '0 auto',
               lineHeight: '1.6'
             }}>
-              🎯 Temukan <strong style={{ color: '#ea580c' }}>ribuan peluang karir</strong> dari perusahaan-perusahaan terbaik di seluruh Indonesia • 🚀 Mulai perjalanan kariermu sekarang!
+              <CursorArrowRaysIcon style={{ width: 18, height: 18, verticalAlign: 'middle', marginTop: '-3px', color: '#ea580c' }} /> Temukan <strong style={{ color: '#ea580c' }}>ribuan peluang karir</strong> dari perusahaan-perusahaan terbaik di seluruh Indonesia • <RocketLaunchIcon style={{ width: 18, height: 18, verticalAlign: 'middle', marginTop: '-3px', color: '#ea580c' }} /> Mulai perjalanan kariermu sekarang!
             </p>
           </div>
         </div>
@@ -307,14 +306,18 @@ const App = () => {
         <div style={{ minHeight: '100vh', position: 'relative', maxWidth: '100vw', overflowX: 'hidden' }}>
           <Navbar isAuthenticated={isAuthenticated} userRole={userRole} handleLogout={handleLogout} />
           <PageTransition>
-            <main>
+            <main style={{ paddingBottom: window.innerWidth < 768 ? '80px' : '0' }}>
               <Routes>
                 <Route path="/" element={<HomePage />} />
+                <Route path="/home" element={<Navigate to="/" replace />} />
                 <Route path="/eksplorasi" element={<EksplorasiPage />} />
                 <Route path="/job/:id" element={<JobDetailWrapper />} />
                 <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />} />
                 <Route path="/register" element={<Register />} />
-                <Route path="/hrd/dashboard" element={<div style={{ paddingTop: '80px' }}><JobPublisher isMobile={window.innerWidth < 768} /></div>} />
+                <Route path="/tentang-kami" element={<InfoPage slug="tentang-kami" />} />
+                <Route path="/kebijakan-privasi" element={<InfoPage slug="kebijakan-privasi" />} />
+                <Route path="/syarat-ketentuan" element={<InfoPage slug="syarat-ketentuan" />} />
+                <Route path="/faq" element={<InfoPage slug="faq" />} /> <Route path="/hrd/dashboard" element={<div style={{ paddingTop: '80px' }}><JobPublisher isMobile={window.innerWidth < 768} /></div>} />
                 <Route path="/hrd/branding" element={<div style={{ paddingTop: '80px' }}><CompanyBrandingForm /></div>} />
                 <Route path="/favorit" element={<div style={{ paddingTop: '80px' }}><FavoriteListContainer /></div>} />
                 <Route path="/status-lamaran" element={<div style={{ paddingTop: '80px' }}><StatusTracker isMobile={window.innerWidth < 768} /></div>} />

@@ -1,4 +1,4 @@
-// src/services/api.js
+
 import axios from 'axios';
 
 const getBaseURL = () => {
@@ -37,7 +37,7 @@ api.interceptors.response.use(
     },
     (error) => {
         if (error.response?.status === 401) {
-            // Optional: redirect to login
+
         }
         return Promise.reject(error);
     }

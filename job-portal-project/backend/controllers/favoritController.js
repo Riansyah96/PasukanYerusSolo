@@ -1,4 +1,4 @@
-// controllers/favoritController.js
+
 const db = require('../config/db');
 
 exports.tambahFavorit = async (req, res) => {

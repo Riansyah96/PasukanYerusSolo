@@ -1,26 +1,27 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { DocumentTextIcon, MagnifyingGlassIcon, ClipboardDocumentListIcon, CursorArrowRaysIcon, RocketLaunchIcon } from '@heroicons/react/24/outline';
 
 const slides = [
   {
-    emoji: '📝',
+    icon: DocumentTextIcon,
     title: 'Buat Akun Gratis',
     desc: 'Daftar dalam 2 menit, isi data diri dan buat profil profesionalmu. Tidak perlu biaya sepeserpun!',
     tag: 'Langkah 1 dari 4'
   },
   {
-    emoji: '🔍',
+    icon: MagnifyingGlassIcon,
     title: 'Cari Lowongan Ideal',
     desc: 'Temukan ribuan lowongan dari perusahaan terpercaya. Filter berdasarkan skill, lokasi, dan gaji impianmu.',
     tag: 'Langkah 2 dari 4'
   },
   {
-    emoji: '📄',
+    icon: ClipboardDocumentListIcon,
     title: 'Lamar Sekali Klik',
     desc: 'Kirim lamaran dengan satu klik. Pantau status lamaran secara real-time tanpa ribet.',
     tag: 'Langkah 3 dari 4'
   },
   {
-    emoji: '🎯',
+    icon: CursorArrowRaysIcon,
     title: 'Dapatkan Pekerjaan',
     desc: 'Terima tawaran dari perusahaan impian dan mulai langkah pertamamu menuju karir gemilang!',
     tag: 'Langkah 4 dari 4'
@@ -181,7 +182,7 @@ const Walkthrough = ({ onComplete }) => {
             animation: 'float 3s ease-in-out infinite',
             display: 'block'
           }}>
-            {slides[currentSlide].emoji}
+            {React.createElement(slides[currentSlide].icon, { style: { width: 'clamp(64px, 15vw, 100px)', height: 'clamp(64px, 15vw, 100px)', color: '#ea580c', display: 'block', margin: '0 auto' } })}
           </div>
 
           <h1 style={{
@@ -223,7 +224,7 @@ const Walkthrough = ({ onComplete }) => {
               onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(234, 88, 12, 0.5)'; }}
               onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 30px rgba(234, 88, 12, 0.4)'; }}
             >
-              🚀 Mulai Sekarang
+              <RocketLaunchIcon style={{ width: 20, height: 20, verticalAlign: "middle", marginTop: "-2px" }} /> Mulai Sekarang
             </button>
           ) : (
             <button

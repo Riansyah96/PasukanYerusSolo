@@ -1,6 +1,6 @@
-// src/components/Modal/Modal.jsx
 import React, { useEffect } from 'react';
 import { ThemeContext } from '../../context/ThemeContext';
+import { CheckCircleIcon, XCircleIcon, ExclamationTriangleIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 
 const Modal = ({ isOpen, onClose, title, message, type = 'success', onConfirm }) => {
     const { theme } = React.useContext(ThemeContext);
@@ -20,17 +20,18 @@ const Modal = ({ isOpen, onClose, title, message, type = 'success', onConfirm })
     if (!isOpen) return null;
 
     const getIcon = () => {
+        const iconStyle = { width: 36, height: 36, color: '#fff' };
         switch (type) {
             case 'success':
-                return '✅';
+                return <CheckCircleIcon style={iconStyle} />;
             case 'error':
-                return '❌';
+                return <XCircleIcon style={iconStyle} />;
             case 'warning':
-                return '⚠️';
+                return <ExclamationTriangleIcon style={iconStyle} />;
             case 'info':
-                return 'ℹ️';
+                return <InformationCircleIcon style={iconStyle} />;
             default:
-                return '✅';
+                return <CheckCircleIcon style={iconStyle} />;
         }
     };
 
@@ -104,7 +105,9 @@ const Modal = ({ isOpen, onClose, title, message, type = 'success', onConfirm })
             border: `2px solid ${colors.border}`
         },
         icon: {
-            fontSize: '36px'
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
         },
         title: {
             fontSize: '24px',

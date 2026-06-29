@@ -1,10 +1,11 @@
-// frontend/src/components/jobs/JobDetail.jsx
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ThemeContext } from '../../context/ThemeContext';
 import api from '../../services/api';
 import ApplyJobForm from '../../features/lamaran/ApplyJobForm';
 import FavoriteService from '../../features/lamaran/FavoriteService';
+import { formatRupiah } from '../../utils/formatRupiah';
+import { CheckCircleIcon, XCircleIcon, ClockIcon, ArrowLeftIcon, BuildingOfficeIcon, TagIcon, MapPinIcon, ArrowRightIcon, XMarkIcon, PhoneIcon, BookOpenIcon, FolderOpenIcon, CurrencyDollarIcon, ClipboardDocumentListIcon, PencilSquareIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 
 const JobDetail = () => {
     const { id } = useParams();
@@ -14,6 +15,7 @@ const JobDetail = () => {
     const [loading, setLoading] = useState(true);
     const [showApplyForm, setShowApplyForm] = useState(false);
     const [toast, setToast] = useState({ show: false, text: '', type: '' });
+    const [showCompanyModal, setShowCompanyModal] = useState(false);
     
     const isDark = theme === 'dark';
     const isAuthenticated = !!localStorage.getItem('token');
@@ -32,14 +34,14 @@ const JobDetail = () => {
     };
 
     const handleApplySuccess = (message) => {
-        showToast(message || '✅ Lamaran berhasil dikirim!', 'success');
+        showToast(message || 'Lamaran berhasil dikirim!', 'success');
         setTimeout(() => {
             setShowApplyForm(false);
         }, 2000);
     };
 
     const handleApplyError = (message) => {
-        showToast(message || '❌ Gagal mengirim lamaran', 'error');
+        showToast(message || 'Gagal mengirim lamaran', 'error');
     };
 
     const getBadgeStyle = (type) => {
@@ -174,8 +176,8 @@ const JobDetail = () => {
         }
     };
 
-    if (loading) return <div style={styles.center}>📡 Memuat data...</div>;
-    if (!job) return <div style={styles.center}>❌ Lowongan tidak ditemukan.</div>;
+    if (loading) return <div style={styles.center}><ClockIcon style={{width: '1.2em', height: '1.2em', verticalAlign: 'middle', marginRight: '4px'}} /> Memuat data...</div>;
+    if (!job) return <div style={styles.center}><XCircleIcon style={{width: '1.2em', height: '1.2em', verticalAlign: 'middle', color: '#ef4444', marginRight: '4px'}} /> Lowongan tidak ditemukan.</div>;
 
     return (
         <>
@@ -190,7 +192,7 @@ const JobDetail = () => {
                         ? (isDark ? '#86efac' : '#166534')
                         : (isDark ? '#fecaca' : '#991b1b')
                 }}>
-                    <span>{toast.type === 'success' ? '✅' : '❌'}</span>
+                    {toast.type === 'success' ? <CheckCircleIcon style={{width: '1.2em', height: '1.2em', verticalAlign: 'middle'}} /> : <XCircleIcon style={{width: '1.2em', height: '1.2em', verticalAlign: 'middle'}} />}
                     {toast.text}
                 </div>
             )}
@@ -210,7 +212,7 @@ const JobDetail = () => {
                         e.currentTarget.style.transform = 'translateX(0)';
                     }}
                 >
-                    ← Kembali
+                    <ArrowLeftIcon style={{width: '1em', height: '1em', verticalAlign: 'middle', marginRight: '4px'}} /> Kembali
                 </button>
 
                 <div style={styles.card}>
@@ -223,8 +225,278 @@ const JobDetail = () => {
                         )}
                     </div>
 
+                    {/* Company Branding */}
+                    <div onClick={() => setShowCompanyModal(true)} style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '14px',
+                        padding: '16px',
+                        background: isDark ? '#1c1917' : '#f5f5f4',
+                        borderRadius: '14px',
+                        marginBottom: '24px',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        border: '1px solid transparent'
+                    }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.borderColor = '#ea580c';
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.borderColor = 'transparent';
+                            e.currentTarget.style.transform = 'translateY(0)';
+                        }}
+                    >
+                        <div style={{ position: 'relative', width: '52px', height: '52px', flexShrink: 0 }}>
+                            {job.logo && (
+                                <img 
+                                    src={`http://localhost:5005/uploads/${job.logo}`}
+                                    alt={job.nama_perusahaan || 'Perusahaan'}
+                                    style={{
+                                        position: 'absolute', inset: 0,
+                                        width: '100%', height: '100%',
+                                        borderRadius: '12px', objectFit: 'cover',
+                                        border: `1px solid ${isDark ? '#262626' : '#e5e5e5'}`,
+                                        zIndex: 1
+                                    }}
+                                    onError={(e) => { e.target.style.display = 'none'; }}
+                                />
+                            )}
+                            <div style={{
+                                width: '52px', height: '52px',
+                                borderRadius: '12px',
+                                background: 'linear-gradient(135deg, #ea580c, #f59e0b)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                fontSize: '24px', color: '#fff'
+                            }}>
+                                <BuildingOfficeIcon style={{width: '24px', height: '24px'}} />
+                            </div>
+                        </div>
+                        <div style={{ flex: 1 }}>
+                            <h3 style={{ margin: 0, fontWeight: '700', fontSize: '16px', color: isDark ? '#fef3c7' : '#1c1917' }}>
+                                {job.nama_perusahaan || 'Perusahaan'}
+                            </h3>
+                            {job.bidang && (
+                                <p style={{ margin: '4px 0 0', fontSize: '12px', color: isDark ? '#a1a1aa' : '#735b4e' }}>
+                                    <TagIcon style={{width: '1em', height: '1em', verticalAlign: 'middle', marginRight: '4px'}} /> {job.bidang}
+                                </p>
+                            )}
+                            {job.lokasi && (
+                                <p style={{ margin: '4px 0 0', fontSize: '13px', color: isDark ? '#a1a1aa' : '#57534e' }}>
+                                    <MapPinIcon style={{width: '1em', height: '1em', verticalAlign: 'middle', marginRight: '4px'}} /> {job.lokasi}
+                                </p>
+                            )}
+                        </div>
+                        <span style={{ fontSize: '12px', color: '#ea580c', fontWeight: '600', whiteSpace: 'nowrap' }}>
+                            Lihat info <ArrowRightIcon style={{width: '1em', height: '1em', verticalAlign: 'middle', marginLeft: '2px'}} />
+                        </span>
+                    </div>
+
+                    {/* Company Info Modal */}
+                    {showCompanyModal && (
+                        <div onClick={() => setShowCompanyModal(false)} style={{
+                            position: 'fixed', inset: 0, zIndex: 5000,
+                            background: 'rgba(0,0,0,0.6)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            padding: '20px', animation: 'fadeIn 0.2s ease'
+                        }}>
+                            <div onClick={(e) => e.stopPropagation()} style={{
+                                background: isDark ? '#120b06' : '#ffffff',
+                                border: `1px solid ${isDark ? '#262626' : '#e5e5e5'}`,
+                                borderRadius: '20px',
+                                padding: '32px 28px',
+                                maxWidth: '460px',
+                                width: '100%',
+                                maxHeight: '90vh',
+                                overflowY: 'auto',
+                                position: 'relative'
+                            }}>
+                                <button onClick={() => setShowCompanyModal(false)} style={{
+                                    position: 'absolute', top: '16px', right: '16px',
+                                    background: 'none', border: 'none',
+                                    fontSize: '20px', cursor: 'pointer',
+                                    color: isDark ? '#a8a29e' : '#57534e',
+                                    width: '36px', height: '36px',
+                                    borderRadius: '50%',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    transition: 'background 0.2s'
+                                }}
+                                    onMouseEnter={(e) => { e.currentTarget.style.background = isDark ? '#262626' : '#f5f5f4'; }}
+                                    onMouseLeave={(e) => { e.currentTarget.style.background = 'none'; }}
+                                ><XMarkIcon style={{width: '20px', height: '20px'}} /></button>
+
+                                {/* Header Section */}
+                                <div style={{
+                                    textAlign: 'center',
+                                    padding: '8px 0 20px'
+                                }}>
+                                    <div style={{
+                                        width: '88px', height: '88px',
+                                        borderRadius: '20px',
+                                        background: 'linear-gradient(135deg, #ea580c, #f59e0b)',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        fontSize: '38px', color: '#fff',
+                                        margin: '0 auto 16px',
+                                        overflow: 'hidden',
+                                        position: 'relative',
+                                        boxShadow: '0 8px 24px rgba(234, 88, 12, 0.25)'
+                                    }}>
+                                        {job.logo && (
+                                            <img 
+                                                src={`http://localhost:5005/uploads/${job.logo}`}
+                                                alt={job.nama_perusahaan || 'Perusahaan'}
+                                                style={{
+                                                    position: 'absolute', inset: 0,
+                                                    width: '100%', height: '100%',
+                                                    objectFit: 'cover', zIndex: 1
+                                                }}
+                                                onError={(e) => { e.target.style.display = 'none'; }}
+                                            />
+                                        )}
+                                        <BuildingOfficeIcon style={{width: '38px', height: '38px'}} />
+                                    </div>
+                                    <h2 style={{
+                                        margin: 0, fontSize: '22px', fontWeight: '800',
+                                        color: isDark ? '#fef3c7' : '#1c1917',
+                                        letterSpacing: '-0.3px'
+                                    }}>
+                                        {job.nama_perusahaan || 'Perusahaan'}
+                                    </h2>
+                                </div>
+
+                                {/* Info Grid */}
+                                {(job.bidang || job.lokasi || job.no_telepon) && (
+                                    <div style={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: '10px',
+                                        marginBottom: '24px'
+                                    }}>
+                                        {job.bidang && (
+                                            <div style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '12px',
+                                                padding: '12px 16px',
+                                                background: isDark ? '#1c1917' : '#f5f5f4',
+                                                borderRadius: '14px'
+                                            }}>
+                                                <div style={{
+                                                    width: '36px', height: '36px',
+                                                    borderRadius: '10px',
+                                                    background: 'linear-gradient(135deg, #ea580c, #f59e0b)',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    fontSize: '16px', flexShrink: 0
+                                                }}><TagIcon style={{width: '16px', height: '16px'}} /></div>
+                                                <div style={{ flex: 1, minWidth: 0 }}>
+                                                    <p style={{
+                                                        margin: 0, fontSize: '11px',
+                                                        color: isDark ? '#a1a1aa' : '#735b4e',
+                                                        fontWeight: '500', textTransform: 'uppercase',
+                                                        letterSpacing: '0.5px'
+                                                    }}>Bidang</p>
+                                                    <p style={{
+                                                        margin: '2px 0 0', fontSize: '14px',
+                                                        color: isDark ? '#f5f5f4' : '#1c1917',
+                                                        fontWeight: '600'
+                                                    }}>{job.bidang}</p>
+                                                </div>
+                                            </div>
+                                        )}
+                                        {job.lokasi && (
+                                            <div style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '12px',
+                                                padding: '12px 16px',
+                                                background: isDark ? '#1c1917' : '#f5f5f4',
+                                                borderRadius: '14px'
+                                            }}>
+                                                <div style={{
+                                                    width: '36px', height: '36px',
+                                                    borderRadius: '10px',
+                                                    background: 'linear-gradient(135deg, #ea580c, #f59e0b)',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    fontSize: '16px', flexShrink: 0
+                                                }}><MapPinIcon style={{width: '16px', height: '16px'}} /></div>
+                                                <div style={{ flex: 1, minWidth: 0 }}>
+                                                    <p style={{
+                                                        margin: 0, fontSize: '11px',
+                                                        color: isDark ? '#a1a1aa' : '#735b4e',
+                                                        fontWeight: '500', textTransform: 'uppercase',
+                                                        letterSpacing: '0.5px'
+                                                    }}>Lokasi</p>
+                                                    <p style={{
+                                                        margin: '2px 0 0', fontSize: '14px',
+                                                        color: isDark ? '#f5f5f4' : '#1c1917',
+                                                        fontWeight: '600'
+                                                    }}>{job.lokasi}</p>
+                                                </div>
+                                            </div>
+                                        )}
+                                        {job.no_telepon && (
+                                            <div style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '12px',
+                                                padding: '12px 16px',
+                                                background: isDark ? '#1c1917' : '#f5f5f4',
+                                                borderRadius: '14px'
+                                            }}>
+                                                <div style={{
+                                                    width: '36px', height: '36px',
+                                                    borderRadius: '10px',
+                                                    background: 'linear-gradient(135deg, #ea580c, #f59e0b)',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    fontSize: '16px', flexShrink: 0
+                                                }}><PhoneIcon style={{width: '16px', height: '16px'}} /></div>
+                                                <div style={{ flex: 1, minWidth: 0 }}>
+                                                    <p style={{
+                                                        margin: 0, fontSize: '11px',
+                                                        color: isDark ? '#a1a1aa' : '#735b4e',
+                                                        fontWeight: '500', textTransform: 'uppercase',
+                                                        letterSpacing: '0.5px'
+                                                    }}>Telepon</p>
+                                                    <p style={{
+                                                        margin: '2px 0 0', fontSize: '14px',
+                                                        color: isDark ? '#f5f5f4' : '#1c1917',
+                                                        fontWeight: '600'
+                                                    }}>{job.no_telepon}</p>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Tentang Perusahaan */}
+                                {job.deskripsi_budaya && (
+                                    <div style={{
+                                        borderTop: `1px solid ${isDark ? '#262626' : '#e5e5e5'}`,
+                                        paddingTop: '24px'
+                                    }}>
+                                        <h4 style={{
+                                            margin: '0 0 12px',
+                                            fontSize: '14px',
+                                            fontWeight: '800',
+                                            color: isDark ? '#fef3c7' : '#1c1917'
+                                        }}                                        ><BookOpenIcon style={{width: '1em', height: '1em', verticalAlign: 'middle', marginRight: '4px'}} /> Tentang Perusahaan</h4>
+                                        <p style={{
+                                            margin: 0,
+                                            fontSize: '14px',
+                                            lineHeight: '1.8',
+                                            color: isDark ? '#a1a1aa' : '#57534e',
+                                            whiteSpace: 'pre-line'
+                                        }}>
+                                            {job.deskripsi_budaya}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
                     <div style={styles.metaContainer}>
-                        <span style={styles.badge}>📂 {job.kategori}</span>
+                        <span style={styles.badge}><FolderOpenIcon style={{width: '1em', height: '1em', verticalAlign: 'middle', marginRight: '4px'}} /> {job.kategori}</span>
                         <span style={{ 
                             ...getBadgeStyle(job.type), 
                             padding: '6px 14px', 
@@ -237,14 +509,14 @@ const JobDetail = () => {
                     </div>
 
                     <div style={styles.section}>
-                        <h3 style={styles.subTitle}>💰 Gaji</h3>
+                        <h3 style={styles.subTitle}><CurrencyDollarIcon style={{width: '1em', height: '1em', verticalAlign: 'middle', marginRight: '4px'}} /> Gaji</h3>
                         <p style={{ color: isDark ? '#fef3c7' : '#1c1917', fontSize: '18px', fontWeight: '600' }}>
-                            {job.gaji}
+                            {formatRupiah(job.gaji)}
                         </p>
                     </div>
 
                     <div style={styles.section}>
-                        <h3 style={styles.subTitle}>📋 Deskripsi Pekerjaan</h3>
+                        <h3 style={styles.subTitle}><ClipboardDocumentListIcon style={{width: '1em', height: '1em', verticalAlign: 'middle', marginRight: '4px'}} /> Deskripsi Pekerjaan</h3>
                         <p style={styles.desc}>{job.deskripsi}</p>
                     </div>
 
@@ -260,7 +532,7 @@ const JobDetail = () => {
                             e.currentTarget.style.boxShadow = 'none';
                         }}
                     >
-                        {isAuthenticated ? (showApplyForm ? '✖ Tutup Form' : '📝 Lamar Sekarang') : '🔒 Login untuk Melamar'}
+                        {isAuthenticated ? (showApplyForm ? <><XMarkIcon style={{width: '1em', height: '1em', verticalAlign: 'middle', marginRight: '4px'}} /> Tutup Form</> : <><PencilSquareIcon style={{width: '1em', height: '1em', verticalAlign: 'middle', marginRight: '4px'}} /> Lamar Sekarang</>) : <><LockClosedIcon style={{width: '1em', height: '1em', verticalAlign: 'middle', marginRight: '4px'}} /> Login untuk Melamar</>}
                     </button>
 
                     {showApplyForm && (

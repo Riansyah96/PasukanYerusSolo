@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ThemeContext } from '../../context/ThemeContext';
+import { SparklesIcon } from '@heroicons/react/24/outline';
 
 const Hero = () => {
   const { theme } = useContext(ThemeContext);
@@ -106,7 +107,7 @@ const Hero = () => {
           display: 'inline-block',
           marginBottom: '24px'
         }}>
-          ✨ #1 Portal Karir di Solo Raya
+          <SparklesIcon style={{ width: 16, height: 16, verticalAlign: "middle", marginTop: "-2px" }} /> #1 Portal Karir di Indonesia
         </span>
 
         <h1 style={{

@@ -4,6 +4,7 @@ import JobList from '../../components/jobs/JobList';
 import FilterBox from './FilterBox';
 import ApplyJobForm from '../lamaran/ApplyJobForm';
 import api from '../../services/api';
+import { ChartBarIcon, XMarkIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
 const JobListContainer = ({ variant = 'simple', limit }) => {
     const { theme } = useContext(ThemeContext);
@@ -12,10 +13,12 @@ const JobListContainer = ({ variant = 'simple', limit }) => {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [type, setType] = useState('Semua');
+    const [sort, setSort] = useState('terbaru');
     const [selectedJobId, setSelectedJobId] = useState(null);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    const [page, setPage] = useState(1);
+    const perPage = 12;
 
-    // Handle window resize untuk responsive
     useEffect(() => {
         const handleResize = () => {
             setIsMobile(window.innerWidth < 768);
@@ -25,7 +28,7 @@ const JobListContainer = ({ variant = 'simple', limit }) => {
     }, []);
 
     useEffect(() => {
-        // Mengambil data dari backend
+
         api.get('/jobs')
             .then(res => {
                 const dataArray = res.data.data || [];
@@ -38,8 +41,16 @@ const JobListContainer = ({ variant = 'simple', limit }) => {
             });
     }, []);
 
+    useEffect(() => {
+        setPage(1);
+    }, [search, type, sort]);
+
     const filteredJobs = useMemo(() => {
         let result = jobs;
+        const parseGaji = (val) => {
+            if (!val) return 0;
+            return parseInt(String(val).replace(/[^\d]/g, '')) || 0;
+        };
         if (search) {
             result = result.filter(j => 
                 j.title?.toLowerCase().includes(search.toLowerCase()) ||
@@ -50,8 +61,22 @@ const JobListContainer = ({ variant = 'simple', limit }) => {
         if (type !== 'Semua') {
             result = result.filter(j => j.type === type);
         }
+        result.sort((a, b) => {
+            switch (sort) {
+                case 'terbaru': return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+                case 'terlama': return new Date(a.created_at || 0) - new Date(b.created_at || 0);
+                case 'gaji-tertinggi': return parseGaji(b.gaji) - parseGaji(a.gaji);
+                case 'gaji-terendah': return parseGaji(a.gaji) - parseGaji(b.gaji);
+                case 'az': return (a.title || '').localeCompare(b.title || '');
+                case 'za': return (b.title || '').localeCompare(a.title || '');
+                default: return 0;
+            }
+        });
         return limit ? result.slice(0, limit) : result;
-    }, [jobs, search, type, limit]);
+    }, [jobs, search, type, sort, limit]);
+
+    const totalPages = Math.ceil(filteredJobs.length / perPage);
+    const pagedJobs = filteredJobs.slice((page - 1) * perPage, page * perPage);
 
     const loadingStyles = {
         textAlign: 'center',
@@ -90,13 +115,15 @@ const JobListContainer = ({ variant = 'simple', limit }) => {
             {variant === 'full' && (
                 <FilterBox 
                     isMobile={isMobile}
-                    onSearchChange={setSearch}
-                    onTypeChange={setType}
+                    onSearchChange={(v) => { setSearch(v); setPage(1); }}
+                    onTypeChange={(v) => { setType(v); setPage(1); }}
+                    onSortChange={(v) => { setSort(v); setPage(1); }}
                     selectedType={type}
+                    selectedSort={sort}
                 />
             )}
 
-            {/* Info hasil pencarian */}
+            
             {variant === 'full' && (search || type !== 'Semua') && (
                 <div style={{
                     marginBottom: '20px',
@@ -111,12 +138,14 @@ const JobListContainer = ({ variant = 'simple', limit }) => {
                     gap: '10px'
                 }}>
                     <span style={{ color: isDark ? '#a3a3a3' : '#57534e', fontSize: '13px' }}>
-                        📊 Menampilkan <strong style={{ color: '#ea580c' }}>{filteredJobs.length}</strong> dari <strong>{jobs.length}</strong> lowongan
+                        <ChartBarIcon style={{ width: 14, height: 14, verticalAlign: 'middle', marginTop: '-2px', marginRight: '4px' }} />Menampilkan <strong style={{ color: '#ea580c' }}>{filteredJobs.length}</strong> lowongan
                     </span>
                     <button 
                         onClick={() => {
                             setSearch('');
                             setType('Semua');
+                            setSort('terbaru');
+                            setPage(1);
                         }}
                         style={{
                             background: 'transparent',
@@ -137,16 +166,74 @@ const JobListContainer = ({ variant = 'simple', limit }) => {
                             e.currentTarget.style.color = isDark ? '#a3a3a3' : '#57534e';
                         }}
                     >
-                        Reset Filter ✖
+                        Reset Filter <XMarkIcon style={{ width: 14, height: 14, verticalAlign: 'middle', marginTop: '-2px' }} />
                     </button>
                 </div>
             )}
 
             <JobList 
-                jobs={filteredJobs} 
+                jobs={variant === 'full' ? pagedJobs : filteredJobs} 
                 variant={variant} 
                 onSelectJob={(job) => setSelectedJobId(job.id)} 
             />
+
+            {variant === 'full' && totalPages > 1 && (
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    gap: '12px',
+                    marginTop: '24px',
+                    padding: '16px',
+                    background: isDark ? '#120b06' : '#ffffff',
+                    borderRadius: '12px',
+                    border: `1px solid ${isDark ? '#262626' : '#e5e5e5'}`
+                }}>
+                    <button
+                        onClick={() => setPage(p => Math.max(1, p - 1))}
+                        disabled={page <= 1}
+                        style={{
+                            background: 'transparent',
+                            border: `1px solid ${isDark ? '#262626' : '#e5e5e5'}`,
+                            borderRadius: '8px',
+                            padding: '6px 12px',
+                            cursor: page <= 1 ? 'default' : 'pointer',
+                            opacity: page <= 1 ? 0.4 : 1,
+                            color: isDark ? '#a3a3a3' : '#57534e',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            fontSize: '12px',
+                            fontWeight: '600'
+                        }}
+                    >
+                        <ChevronLeftIcon style={{ width: 14, height: 14 }} /> Sebelumnya
+                    </button>
+                    <span style={{ fontSize: '13px', color: isDark ? '#a3a3a3' : '#57534e' }}>
+                        Halaman <strong style={{ color: '#ea580c' }}>{page}</strong> dari {totalPages}
+                    </span>
+                    <button
+                        onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                        disabled={page >= totalPages}
+                        style={{
+                            background: 'transparent',
+                            border: `1px solid ${isDark ? '#262626' : '#e5e5e5'}`,
+                            borderRadius: '8px',
+                            padding: '6px 12px',
+                            cursor: page >= totalPages ? 'default' : 'pointer',
+                            opacity: page >= totalPages ? 0.4 : 1,
+                            color: isDark ? '#a3a3a3' : '#57534e',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            fontSize: '12px',
+                            fontWeight: '600'
+                        }}
+                    >
+                        Selanjutnya <ChevronRightIcon style={{ width: 14, height: 14 }} />
+                    </button>
+                </div>
+            )}
 
             {selectedJobId && (
                 <div style={{ 

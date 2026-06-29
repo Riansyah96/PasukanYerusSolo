@@ -1,8 +1,7 @@
-// config/db.js
+
 const mysql = require('mysql2');
 require('dotenv').config();
 
-// Membuat koneksi pool agar efisien untuk banyak pengguna
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -13,7 +12,6 @@ const pool = mysql.createPool({
   connectionLimit: 10
 });
 
-// Mengecek koneksi saat server pertama kali jalan
 const promisePool = pool.promise();
 promisePool.query('SELECT 1 + 1 AS result')
   .then(() => console.log('Koneksi Database MySQL/MariaDB Berhasil ✅'))

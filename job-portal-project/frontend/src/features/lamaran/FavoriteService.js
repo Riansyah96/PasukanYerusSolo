@@ -1,4 +1,3 @@
-// src/features/lamaran/FavoriteService.js
 import React, { useState, useEffect, useContext } from 'react';
 import api from '../../services/api';
 import { ThemeContext } from '../../context/ThemeContext';
@@ -41,7 +40,7 @@ const FavoriteService = ({ jobId }) => {
         
         const token = localStorage.getItem('token');
         if (!token) {
-            showNotification('⚠️ Perlu Login', 'Silakan login terlebih dahulu untuk menyimpan favorit!', 'warning');
+            showNotification('Perlu Login', 'Silakan login terlebih dahulu untuk menyimpan favorit!', 'warning');
             setTimeout(() => {
                 window.location.href = '/login';
             }, 2000);
@@ -54,15 +53,15 @@ const FavoriteService = ({ jobId }) => {
             if (isFavorited) {
                 await api.delete(`/favorit/${jobId}`);
                 setIsFavorited(false);
-                showNotification('⭐ Dihapus dari Favorit', 'Lowongan berhasil dihapus dari daftar favorit!', 'success');
+                showNotification('Dihapus dari Favorit', 'Lowongan berhasil dihapus dari daftar favorit!', 'success');
             } else {
                 await api.post('/favorit', { id_lowongan: jobId });
                 setIsFavorited(true);
-                showNotification('✨ Tersimpan ke Favorit', 'Lowongan berhasil disimpan ke daftar favorit!', 'success');
+                showNotification('Tersimpan ke Favorit', 'Lowongan berhasil disimpan ke daftar favorit!', 'success');
             }
         } catch (err) {
             const msg = err.response?.data?.message || err.message || 'Gagal memproses favorit';
-            showNotification('❌ Gagal', msg, 'error');
+            showNotification('Gagal', msg, 'error');
         } finally {
             setIsLoading(false);
         }
@@ -76,7 +75,6 @@ const FavoriteService = ({ jobId }) => {
         borderRadius: '10px',
         fontSize: '13px',
         fontWeight: '700',
-        border: 'none',
         cursor: isLoading ? 'not-allowed' : 'pointer',
         transition: 'all 0.3s ease',
         background: isFavorited 
@@ -118,12 +116,12 @@ const FavoriteService = ({ jobId }) => {
                     }
                 }}
             >
-                {isLoading ? '⏳...' : (
+                {isLoading ? '...' : (
                     <>
                         {isFavorited ? (
-                            <><span>⭐</span> Hapus dari Favorit</>
+                            <>Hapus dari Favorit</>
                         ) : (
-                            <><span>☆</span> Tambah ke Favorit</>
+                            <>Tambah ke Favorit</>
                         )}
                     </>
                 )}

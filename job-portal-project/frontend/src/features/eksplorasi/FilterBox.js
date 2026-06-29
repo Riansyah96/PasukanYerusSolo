@@ -1,7 +1,8 @@
 import React, { useContext } from 'react';
 import { ThemeContext } from '../../context/ThemeContext';
+import { MagnifyingGlassIcon, DocumentTextIcon, TagIcon, BoltIcon, BarsArrowDownIcon } from '@heroicons/react/24/outline';
 
-const FilterBox = ({ isMobile, onSearchChange, onTypeChange, selectedType }) => {
+const FilterBox = ({ isMobile, onSearchChange, onTypeChange, selectedType, onSortChange, selectedSort }) => {
     const { theme } = useContext(ThemeContext);
     const isDark = theme === 'dark';
 
@@ -69,7 +70,7 @@ const FilterBox = ({ isMobile, onSearchChange, onTypeChange, selectedType }) => 
                 alignItems: 'center',
                 gap: '8px'
             }}>
-                🔍 Filter Pencarian
+                <MagnifyingGlassIcon style={{ width: 16, height: 16, verticalAlign: "middle", marginTop: "-2px" }} /> Filter Pencarian
             </h4>
             
             <div style={{ 
@@ -79,7 +80,7 @@ const FilterBox = ({ isMobile, onSearchChange, onTypeChange, selectedType }) => 
                 width: '100%' 
             }}>
                 <div style={{ flex: 2 }}>
-                    <label style={labelStyle}>📝 Kata Kunci</label>
+                    <label style={labelStyle}><DocumentTextIcon style={{ width: 12, height: 12, verticalAlign: "middle", marginTop: "-2px" }} /> Kata Kunci</label>
                     <input 
                         type="text" 
                         placeholder="Cari posisi atau nama perusahaan..." 
@@ -90,7 +91,7 @@ const FilterBox = ({ isMobile, onSearchChange, onTypeChange, selectedType }) => 
                     />
                 </div>
                 <div style={{ flex: 1 }}>
-                    <label style={labelStyle}>🏷️ Tipe Pekerjaan</label>
+                    <label style={labelStyle}><TagIcon style={{ width: 12, height: 12, verticalAlign: "middle", marginTop: "-2px" }} /> Tipe Pekerjaan</label>
                     <select 
                         value={selectedType} 
                         style={inputStyle}
@@ -98,15 +99,32 @@ const FilterBox = ({ isMobile, onSearchChange, onTypeChange, selectedType }) => 
                         onBlur={handleInputBlur}
                         onChange={(e) => onTypeChange(e.target.value)}
                     >
-                        <option value="Semua">📋 Semua Tipe</option>
-                        <option value="Full-time">⏰ Full-time</option>
-                        <option value="Remote">🏠 Remote</option>
-                        <option value="Contract">📄 Contract</option>
+                        <option value="Semua">Semua Tipe</option>
+                        <option value="Full-time">Full-time</option>
+                        <option value="Remote">Remote</option>
+                        <option value="Contract">Contract</option>
+                    </select>
+                </div>
+                <div style={{ flex: 1 }}>
+                    <label style={labelStyle}><BarsArrowDownIcon style={{ width: 12, height: 12, verticalAlign: "middle", marginTop: "-2px" }} /> Urutkan</label>
+                    <select 
+                        value={selectedSort}
+                        style={inputStyle}
+                        onFocus={handleInputFocus}
+                        onBlur={handleInputBlur}
+                        onChange={(e) => onSortChange(e.target.value)}
+                    >
+                        <option value="terbaru">Terbaru</option>
+                        <option value="terlama">Terlama</option>
+                        <option value="gaji-tertinggi">Gaji Tertinggi</option>
+                        <option value="gaji-terendah">Gaji Terendah</option>
+                        <option value="az">A-Z</option>
+                        <option value="za">Z-A</option>
                     </select>
                 </div>
             </div>
 
-            {/* Statistik hasil filter */}
+            
             <div style={{
                 marginTop: '8px',
                 paddingTop: '12px',
@@ -117,8 +135,8 @@ const FilterBox = ({ isMobile, onSearchChange, onTypeChange, selectedType }) => 
                 justifyContent: 'space-between',
                 alignItems: 'center'
             }}>
-                <span>⚡ Gunakan filter untuk mempersempit pencarian</span>
-                {(selectedType !== 'Semua' || onSearchChange !== undefined) && (
+                <span><BoltIcon style={{ width: 14, height: 14, verticalAlign: "middle", marginTop: "-2px" }} /> Gunakan filter untuk mempersempit pencarian</span>
+                {(selectedType !== 'Semua' || selectedSort !== 'terbaru') && (
                     <span style={{ color: '#ea580c', fontSize: '11px' }}>
                         Filter aktif
                     </span>

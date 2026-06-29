@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ThemeContext } from '../../context/ThemeContext';
 import api from '../../services/api';
 import Modal from '../Modal/Modal';
+import { SparklesIcon, EnvelopeIcon, LockClosedIcon, EyeIcon, ArrowPathIcon, RocketLaunchIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
 const Login = ({ onLoginSuccess }) => {
     const navigate = useNavigate();
@@ -43,18 +44,18 @@ const Login = ({ onLoginSuccess }) => {
                     localStorage.setItem('role', userRole);
                 }
                 
-                showNotification('✅ Berhasil Login', `Selamat datang kembali!`, 'success');
+                showNotification('Berhasil Login', `Selamat datang kembali!`, 'success');
                 
                 if (onLoginSuccess) onLoginSuccess();
                 setTimeout(() => {
                     navigate('/');
                 }, 2000);
             } else {
-                showNotification('❌ Gagal Login', 'Response tidak valid dari server', 'error');
+                showNotification('Gagal Login', 'Response tidak valid dari server', 'error');
             }
         } catch (err) {
             const errorMsg = err.response?.data?.message || 'Email atau password salah!';
-            showNotification('❌ Gagal Login', errorMsg, 'error');
+            showNotification('Gagal Login', errorMsg, 'error');
         } finally {
             setLoading(false);
         }
@@ -198,7 +199,7 @@ const Login = ({ onLoginSuccess }) => {
 
     return (
         <>
-            {/* Modal Notification */}
+            
             <Modal
                 isOpen={showModal}
                 onClose={() => setShowModal(false)}
@@ -214,11 +215,11 @@ const Login = ({ onLoginSuccess }) => {
                         <div style={styles.subBrand}>Job Portal</div>
                     </div>
                     <h2 style={styles.title}>
-                        <span style={{ color: '#ea580c' }}>✨</span> Masuk Akun
+                        <SparklesIcon style={{ width: 20, height: 20, verticalAlign: 'middle', marginTop: '-3px', color: '#ea580c' }} /> Masuk Akun
                     </h2>
                     {error && <div style={styles.errorAlert}>{error}</div>}
                     <form onSubmit={handleLogin}>
-                        <label style={styles.label}>📧 Email</label>
+                        <label style={styles.label}><EnvelopeIcon style={{ width: 14, height: 14, verticalAlign: 'middle', marginTop: '-2px' }} /> Email</label>
                         <div style={styles.inputWrapper}>
                             <input 
                                 type="email" 
@@ -231,7 +232,7 @@ const Login = ({ onLoginSuccess }) => {
                             />
                         </div>
                         
-                        <label style={styles.label}>🔒 Password</label>
+                        <label style={styles.label}><LockClosedIcon style={{ width: 14, height: 14, verticalAlign: 'middle', marginTop: '-2px' }} /> Password</label>
                         <div style={styles.inputWrapper}>
                             <input 
                                 type={showPassword ? "text" : "password"} 
@@ -247,7 +248,7 @@ const Login = ({ onLoginSuccess }) => {
                                 onClick={() => setShowPassword(!showPassword)}
                                 style={styles.passwordToggle}
                             >
-                                {showPassword ? '👁️' : '🔒'}
+                                {showPassword ? <EyeIcon style={{ width: 18, height: 18 }} /> : <LockClosedIcon style={{ width: 18, height: 18 }} />}
                             </button>
                         </div>
                         
@@ -264,7 +265,7 @@ const Login = ({ onLoginSuccess }) => {
                                 e.currentTarget.style.boxShadow = 'none';
                             }}
                         >
-                            {loading ? '⏳ Memverifikasi...' : '🚀 Masuk Akun'}
+                            {loading ? <><ArrowPathIcon style={{ width: 18, height: 18, verticalAlign: 'middle', marginTop: '-2px', animation: 'spin 1s linear infinite' }} /> Memverifikasi...</> : <><RocketLaunchIcon style={{ width: 18, height: 18, verticalAlign: 'middle', marginTop: '-2px' }} /> Masuk Akun</>}
                         </button>
                     </form>
                     
@@ -283,7 +284,7 @@ const Login = ({ onLoginSuccess }) => {
                             e.currentTarget.style.transform = 'translateY(0)';
                         }}
                     >
-                        🔍 Jelajahi Sebagai Guest
+                        <MagnifyingGlassIcon style={{ width: 18, height: 18, verticalAlign: 'middle', marginTop: '-2px' }} /> Jelajahi Sebagai Guest
                     </button>
                     
                     <p style={styles.footerText}>
@@ -317,6 +318,10 @@ const Login = ({ onLoginSuccess }) => {
                         0%, 100% { transform: translateX(0); }
                         25% { transform: translateX(-5px); }
                         75% { transform: translateX(5px); }
+                    }
+                    @keyframes spin {
+                        from { transform: rotate(0deg); }
+                        to { transform: rotate(360deg); }
                     }
                 `}</style>
             </div>

@@ -1,7 +1,9 @@
-// frontend/src/components/jobs/JobCard.jsx
+
 import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ThemeContext } from '../../context/ThemeContext';
+import { FolderOpenIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
+import { formatRupiah } from '../../utils/formatRupiah';
 const JobCard = ({ job, isFull }) => {
     const navigate = useNavigate();
     const { theme } = useContext(ThemeContext);
@@ -109,8 +111,8 @@ const JobCard = ({ job, isFull }) => {
 
             <h3 style={titleStyles}>{job.title || "Posisi Tidak Diketahui"}</h3>
             
-            <p style={categoryStyles}>📂 Kategori: {job.kategori || "Umum"}</p>
-            <p style={salaryStyles}>💰 {job.gaji || "Gaji tidak dicantumkan"}</p>
+            <p style={categoryStyles}><FolderOpenIcon style={{ width: 14, height: 14, verticalAlign: 'middle', marginTop: '-2px' }} /> Kategori: {job.kategori || "Umum"}</p>
+            <p style={salaryStyles}><CurrencyDollarIcon style={{ width: 16, height: 16, verticalAlign: 'middle', marginTop: '-2px' }} /> {job.gaji ? formatRupiah(job.gaji) : "Gaji tidak dicantumkan"}</p>
             
             {isFull && (
                 <div style={detailSectionStyles}>

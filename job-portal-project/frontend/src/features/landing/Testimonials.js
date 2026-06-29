@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import ScrollReveal from '../../components/ScrollReveal';
 import { ThemeContext } from '../../context/ThemeContext';
+import { StarIcon } from '@heroicons/react/24/outline';
 
 const Testimonials = () => {
   const { theme } = useContext(ThemeContext);
@@ -149,7 +150,7 @@ const Testimonials = () => {
 
           <div style={{ marginBottom: '16px' }}>
             {[...Array(t.rating)].map((_, i) => (
-              <span key={i} style={{ color: '#f59e0b', fontSize: '18px', marginRight: '2px' }}>★</span>
+              <StarIcon key={i} style={{ width: 18, height: 18, color: '#f59e0b', display: 'inline', verticalAlign: 'middle' }} />
             ))}
           </div>
 

@@ -1,5 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { ThemeContext } from '../../context/ThemeContext';
+import { MegaphoneIcon, RocketLaunchIcon } from '@heroicons/react/24/outline';
 
 const FormLowonganControlled = ({ onSaveJob, isMobile }) => {
     const { theme } = useContext(ThemeContext);
@@ -102,7 +103,7 @@ const FormLowonganControlled = ({ onSaveJob, isMobile }) => {
 
     return (
         <div style={styles.formCard}>
-            <h2 style={styles.title}>📢 Publikasikan Lowongan</h2>
+            <h2 style={styles.title}><MegaphoneIcon style={{ width: 22, height: 22, verticalAlign: "middle", marginTop: "-3px" }} /> Publikasikan Lowongan</h2>
             <p style={styles.subtitle}>Buat dan terbitkan berkas kualifikasi pekerjaan baru ke dalam sistem portal pencarian kerja.</p>
             
             <form onSubmit={handleSubmit}>
@@ -154,10 +155,10 @@ const FormLowonganControlled = ({ onSaveJob, isMobile }) => {
                                 e.currentTarget.style.boxShadow = 'none';
                             }}
                         >
-                            <option value="Full-time">⏰ Full-time</option>
-                            <option value="Part-time">🕒 Part-time</option>
-                            <option value="Remote">🏠 Remote</option>
-                            <option value="Contract">📄 Contract</option>
+                            <option value="Full-time">Full-time</option>
+                            <option value="Part-time">Part-time</option>
+                            <option value="Remote">Remote</option>
+                            <option value="Contract">Contract</option>
                         </select>
                     </div>
                     <div style={styles.formGroup}>
@@ -222,7 +223,7 @@ const FormLowonganControlled = ({ onSaveJob, isMobile }) => {
                         e.currentTarget.style.boxShadow = '0 4px 16px rgba(234, 88, 12, 0.15)';
                     }}
                 >
-                    🚀 Simpan & Publikasikan Lowongan
+                    <RocketLaunchIcon style={{ width: 16, height: 16, verticalAlign: "middle", marginTop: "-2px" }} /> Simpan & Publikasikan Lowongan
                 </button>
             </form>
         </div>

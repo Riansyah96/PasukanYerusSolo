@@ -1,17 +1,20 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { ThemeContext } from '../../context/ThemeContext';
 import api from '../../services/api';
+import { ArrowPathIcon, ClipboardDocumentListIcon, SpeakerWaveIcon, CheckCircleIcon, XCircleIcon, ClockIcon, CalendarDaysIcon, ChatBubbleLeftRightIcon, InboxIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
 export default function StatusTracker({ appTheme, isMobile }) {
     const { theme } = useContext(ThemeContext);
     const isDark = theme === 'dark';
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [page, setPage] = useState(1);
+    const perPage = 10;
 
     useEffect(() => {
         const fetchApplications = async () => {
             try {
-                // Gunakan endpoint /api/lamaran
+
                 const response = await api.get('/lamaran');
                 
                 if (response.data && response.data.length > 0) {
@@ -31,13 +34,13 @@ export default function StatusTracker({ appTheme, isMobile }) {
 
     const getStatusBadge = (status) => {
         const statusMap = {
-            'Menunggu': { bg: 'linear-gradient(135deg, #6b7280, #4b5563)', text: '#fff', label: '🕒 Menunggu' },
-            'Review': { bg: 'linear-gradient(135deg, #f59e0b, #ea580c)', text: '#fff', label: '📋 Review' },
-            'Interview': { bg: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', text: '#fff', label: '🗣️ Interview' },
-            'Lolos': { bg: 'linear-gradient(135deg, #22c55e, #16a34a)', text: '#fff', label: '✅ Lolos' },
-            'Gagal': { bg: 'linear-gradient(135deg, #ef4444, #dc2626)', text: '#fff', label: '❌ Gagal' }
+            'Menunggu': { bg: 'linear-gradient(135deg, #6b7280, #4b5563)', text: '#fff', icon: ClockIcon },
+            'Review': { bg: 'linear-gradient(135deg, #f59e0b, #ea580c)', text: '#fff', icon: ClipboardDocumentListIcon },
+            'Interview': { bg: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', text: '#fff', icon: SpeakerWaveIcon },
+            'Lolos': { bg: 'linear-gradient(135deg, #22c55e, #16a34a)', text: '#fff', icon: CheckCircleIcon },
+            'Gagal': { bg: 'linear-gradient(135deg, #ef4444, #dc2626)', text: '#fff', icon: XCircleIcon }
         };
-        return statusMap[status] || { bg: 'linear-gradient(135deg, #6b7280, #4b5563)', text: '#fff', label: '📋 Menunggu' };
+        return statusMap[status] || { bg: 'linear-gradient(135deg, #6b7280, #4b5563)', text: '#fff', icon: ClockIcon };
     };
 
     const formatDate = (dateString) => {
@@ -70,7 +73,7 @@ export default function StatusTracker({ appTheme, isMobile }) {
                     margin: '0 auto 16px auto',
                     animation: 'spin 1s linear infinite'
                 }} />
-                <p>⏳ Memuat data lamaran...</p>
+                <p><ArrowPathIcon style={{ width: 14, height: 14, verticalAlign: "middle", marginTop: "-2px", animation: "spin 1s linear infinite" }} /> Memuat data lamaran...</p>
                 <style>{`
                     @keyframes spin {
                         0% { transform: rotate(0deg); }
@@ -85,7 +88,7 @@ export default function StatusTracker({ appTheme, isMobile }) {
         <div style={{ padding: isMobile ? '20px' : '40px', maxWidth: '900px', margin: '0 auto', width: '100%' }}>
             <div style={{ marginBottom: '32px' }}>
                 <h1 style={{ color: colors.textMain, fontSize: isMobile ? '24px' : '32px', fontWeight: '800', marginBottom: '8px' }}>
-                    📋 Riwayat Lamaran
+                    <ClipboardDocumentListIcon style={{ width: 24, height: 24, verticalAlign: "middle", marginTop: "-4px" }} /> Riwayat Lamaran
                 </h1>
                 <p style={{ color: colors.textMuted, fontSize: '14px' }}>
                     Total <strong style={{ color: '#ea580c' }}>{applications.length}</strong> lamaran yang telah Anda kirim
@@ -93,7 +96,7 @@ export default function StatusTracker({ appTheme, isMobile }) {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                {applications.map((app, index) => {
+                {applications.slice((page - 1) * perPage, page * perPage).map((app, index) => {
                     const badge = getStatusBadge(app.status);
                     return (
                         <div 
@@ -122,7 +125,7 @@ export default function StatusTracker({ appTheme, isMobile }) {
                                     {app.nama_perusahaan || 'Perusahaan'}
                                 </p>
                                 <p style={{ margin: '0', fontSize: '12px', color: colors.textMuted }}>
-                                    📅 Melamar pada: {formatDate(app.tanggal_melamar)}
+                                    <CalendarDaysIcon style={{ width: 12, height: 12, verticalAlign: "middle", marginTop: "-2px" }} /> Melamar pada: {formatDate(app.tanggal_melamar)}
                                 </p>
                                 {app.pesan_tambahan && (
                                     <div style={{ 
@@ -134,7 +137,7 @@ export default function StatusTracker({ appTheme, isMobile }) {
                                         color: colors.textMuted, 
                                         borderLeft: `2px solid #ea580c` 
                                     }}>
-                                        💬 {app.pesan_tambahan}
+                                        <ChatBubbleLeftRightIcon style={{ width: 12, height: 12, verticalAlign: "middle", marginTop: "-2px" }} /> {app.pesan_tambahan}
                                     </div>
                                 )}
                             </div>
@@ -148,12 +151,26 @@ export default function StatusTracker({ appTheme, isMobile }) {
                                 fontSize: isMobile ? '11px' : '12px',
                                 whiteSpace: 'nowrap'
                             }}>
-                                {badge.label}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    {React.createElement(badge.icon, { style: { width: 12, height: 12 } })} {app.status}
+                                </div>
                             </div>
                         </div>
                     );
                 })}
             </div>
+
+            {applications.length > perPage && (
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px', marginTop: '24px', padding: '16px', background: colors.cardBg, borderRadius: '12px', border: `1px solid ${colors.border}` }}>
+                    <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1} style={{ background: 'transparent', border: `1px solid ${colors.border}`, borderRadius: '8px', padding: '6px 12px', cursor: page <= 1 ? 'default' : 'pointer', opacity: page <= 1 ? 0.4 : 1, color: colors.textMuted, fontSize: '12px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <ChevronLeftIcon style={{ width: 14, height: 14 }} /> Sebelumnya
+                    </button>
+                    <span style={{ fontSize: '13px', color: colors.textMuted }}>Halaman <strong style={{ color: '#ea580c' }}>{page}</strong> dari {Math.ceil(applications.length / perPage)}</span>
+                    <button onClick={() => setPage(p => Math.min(Math.ceil(applications.length / perPage), p + 1))} disabled={page >= Math.ceil(applications.length / perPage)} style={{ background: 'transparent', border: `1px solid ${colors.border}`, borderRadius: '8px', padding: '6px 12px', cursor: page >= Math.ceil(applications.length / perPage) ? 'default' : 'pointer', opacity: page >= Math.ceil(applications.length / perPage) ? 0.4 : 1, color: colors.textMuted, fontSize: '12px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        Selanjutnya <ChevronRightIcon style={{ width: 14, height: 14 }} />
+                    </button>
+                </div>
+            )}
 
             {applications.length === 0 && (
                 <div style={{ 
@@ -164,7 +181,7 @@ export default function StatusTracker({ appTheme, isMobile }) {
                     borderRadius: '20px',
                     border: `1px solid ${colors.border}`
                 }}>
-                    <span style={{ fontSize: '48px', display: 'block', marginBottom: '16px' }}>📭</span>
+                    <InboxIcon style={{ width: 48, height: 48, display: 'block', margin: '0 auto 16px auto', color: isDark ? '#a3a3a3' : '#9ca3af' }} />
                     <h3 style={{ color: colors.textMain, marginBottom: '8px' }}>Belum Ada Lamaran</h3>
                     <p>Anda belum mengirimkan lamaran apapun. Yuk, cari lowongan sekarang!</p>
                 </div>

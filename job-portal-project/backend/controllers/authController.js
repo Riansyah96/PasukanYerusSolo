@@ -1,4 +1,4 @@
-// controllers/authController.js
+
 const pool = require('../config/db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -147,20 +147,33 @@ exports.applyJob = async (req, res, next) => {
     }
 };
 
+exports.getCompanyProfile = async (req, res, next) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM profil_perusahaan WHERE id_user = ?', [req.user.id_user]);
+        if (rows.length === 0) {
+            return res.json({ data: null });
+        }
+        res.json({ data: rows[0] });
+    } catch (err) {
+        console.error('GetCompanyProfile error:', err);
+        next(err);
+    }
+};
+
 exports.updateCompanyProfile = async (req, res, next) => {
     try {
-        const { nama_perusahaan, deskripsi, alamat, telepon, website } = req.body;
+        const { nama_perusahaan, deskripsi_budaya, lokasi, no_telepon, bidang } = req.body;
         const logo = req.file ? req.file.filename : null;
         
         if (logo) {
             await pool.query(
-                'INSERT INTO profil_perusahaan (id_user, nama_perusahaan, deskripsi, alamat, telepon, website, logo) VALUES (?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE nama_perusahaan=?, deskripsi=?, alamat=?, telepon=?, website=?, logo=?',
-                [req.user.id_user, nama_perusahaan, deskripsi, alamat, telepon, website, logo, nama_perusahaan, deskripsi, alamat, telepon, website, logo]
+                'INSERT INTO profil_perusahaan (id_user, nama_perusahaan, deskripsi_budaya, lokasi, no_telepon, bidang, logo) VALUES (?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE nama_perusahaan=?, deskripsi_budaya=?, lokasi=?, no_telepon=?, bidang=?, logo=?',
+                [req.user.id_user, nama_perusahaan, deskripsi_budaya, lokasi, no_telepon, bidang, logo, nama_perusahaan, deskripsi_budaya, lokasi, no_telepon, bidang, logo]
             );
         } else {
             await pool.query(
-                'INSERT INTO profil_perusahaan (id_user, nama_perusahaan, deskripsi, alamat, telepon, website) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE nama_perusahaan=?, deskripsi=?, alamat=?, telepon=?, website=?',
-                [req.user.id_user, nama_perusahaan, deskripsi, alamat, telepon, website, nama_perusahaan, deskripsi, alamat, telepon, website]
+                'INSERT INTO profil_perusahaan (id_user, nama_perusahaan, deskripsi_budaya, lokasi, no_telepon, bidang) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE nama_perusahaan=?, deskripsi_budaya=?, lokasi=?, no_telepon=?, bidang=?',
+                [req.user.id_user, nama_perusahaan, deskripsi_budaya, lokasi, no_telepon, bidang, nama_perusahaan, deskripsi_budaya, lokasi, no_telepon, bidang]
             );
         }
         
@@ -211,8 +224,7 @@ exports.updateProfile = async (req, res, next) => {
             'UPDATE users SET nama = ?, telepon = ?, keahlian = ?, tentang_saya = ? WHERE id_user = ?',
             [nama, telepon || '', keahlian || '', tentang_saya || '', req.user.id_user]
         );
-        
-        // Handle foto upload
+
         if (req.files && req.files.foto) {
             const fotoFile = req.files.foto[0];
             const fotoName = `${Date.now()}-${fotoFile.originalname}`;

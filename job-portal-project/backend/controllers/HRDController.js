@@ -1,4 +1,4 @@
-// controllers/HRDController.js
+
 const pool = require('../config/db');
 
 class HRDController {

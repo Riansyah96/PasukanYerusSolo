@@ -1,8 +1,8 @@
-// controllers/AdminController.js
+
 const pool = require('../config/db');
 
 class AdminController {
-  // Dashboard Stats
+
   async getStats(req, res) {
     try {
       const [totalUsers] = await pool.query('SELECT COUNT(*) as total FROM users');
@@ -10,13 +10,15 @@ class AdminController {
       const [totalJobSeekers] = await pool.query('SELECT COUNT(*) as total FROM users WHERE role = "Pelamar"');
       const [totalJobs] = await pool.query('SELECT COUNT(*) as total FROM lowongan');
       const [totalApplications] = await pool.query('SELECT COUNT(*) as total FROM lamaran');
+      const [totalTestimonials] = await pool.query('SELECT COUNT(*) as total FROM testimonials');
       
       res.json({
         total_users: totalUsers[0].total,
         total_companies: totalCompanies[0].total,
         total_job_seekers: totalJobSeekers[0].total,
         total_jobs: totalJobs[0].total,
-        total_applications: totalApplications[0].total
+        total_applications: totalApplications[0].total,
+        total_testimonials: totalTestimonials[0].total
       });
     } catch (err) {
       console.error('Get stats error:', err);
@@ -24,7 +26,6 @@ class AdminController {
     }
   }
 
-  // GET all users
   async getAllUsers(req, res) {
     try {
       const [rows] = await pool.query(
@@ -37,7 +38,6 @@ class AdminController {
     }
   }
 
-  // GET user by ID
   async getUserById(req, res) {
     try {
       const { id } = req.params;
@@ -55,7 +55,6 @@ class AdminController {
     }
   }
 
-  // UPDATE user
   async updateUser(req, res) {
     try {
       const { id } = req.params;
@@ -73,7 +72,6 @@ class AdminController {
     }
   }
 
-  // DELETE user
   async deleteUser(req, res) {
     try {
       const { id } = req.params;
@@ -90,7 +88,6 @@ class AdminController {
     }
   }
 
-  // GET all jobs
   async getAllJobs(req, res) {
     try {
       const [rows] = await pool.query(
@@ -106,7 +103,6 @@ class AdminController {
     }
   }
 
-  // UPDATE job
   async updateJob(req, res) {
     try {
       const { id } = req.params;
@@ -124,7 +120,6 @@ class AdminController {
     }
   }
 
-  // DELETE job
   async deleteJob(req, res) {
     try {
       const { id } = req.params;
@@ -140,7 +135,6 @@ class AdminController {
     }
   }
 
-  // GET all applications
   async getAllApplications(req, res) {
     try {
       const [rows] = await pool.query(
@@ -161,7 +155,6 @@ class AdminController {
     }
   }
 
-  // UPDATE application status
   async updateApplicationStatus(req, res) {
     try {
       const { id } = req.params;
@@ -177,6 +170,58 @@ class AdminController {
     } catch (err) {
       console.error('Update application status error:', err);
       res.status(500).json({ message: 'Gagal memperbarui status' });
+    }
+  }
+
+  async getAllTestimonials(req, res) {
+    try {
+      await pool.query(
+        `CREATE TABLE IF NOT EXISTS testimonials (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          nama VARCHAR(255) NOT NULL,
+          role VARCHAR(255) DEFAULT '',
+          perusahaan VARCHAR(255) DEFAULT '',
+          teks TEXT NOT NULL,
+          rating INT DEFAULT 5,
+          status ENUM('pending','approved','rejected') DEFAULT 'pending',
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`
+      );
+      const [rows] = await pool.query(
+        'SELECT * FROM testimonials ORDER BY created_at DESC'
+      );
+      res.json(rows);
+    } catch (err) {
+      console.error('Get testimonials error:', err);
+      res.status(500).json({ message: 'Gagal mengambil data testimonial' });
+    }
+  }
+
+  async updateTestimonial(req, res) {
+    try {
+      const { id } = req.params;
+      const { nama, role, perusahaan, teks, rating, status } = req.body;
+
+      await pool.query(
+        'UPDATE testimonials SET nama = ?, role = ?, perusahaan = ?, teks = ?, rating = ?, status = ? WHERE id = ?',
+        [nama, role || '', perusahaan || '', teks, rating || 5, status || 'approved', id]
+      );
+
+      res.json({ message: 'Testimonial berhasil diperbarui' });
+    } catch (err) {
+      console.error('Update testimonial error:', err);
+      res.status(500).json({ message: 'Gagal memperbarui testimonial' });
+    }
+  }
+
+  async deleteTestimonial(req, res) {
+    try {
+      const { id } = req.params;
+      await pool.query('DELETE FROM testimonials WHERE id = ?', [id]);
+      res.json({ message: 'Testimonial berhasil dihapus' });
+    } catch (err) {
+      console.error('Delete testimonial error:', err);
+      res.status(500).json({ message: 'Gagal menghapus testimonial' });
     }
   }
 }
